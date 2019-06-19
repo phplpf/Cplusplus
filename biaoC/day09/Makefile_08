@@ -1,0 +1,8 @@
+a.out : 08main.o 08read.o
+	gcc 08main.o 08read.o
+
+08main.o : 08main.c
+	gcc -c 08main.c
+
+08read.o : 08read.c
+	gcc -c 08read.c
