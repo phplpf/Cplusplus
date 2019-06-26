@@ -1,0 +1,191 @@
+回忆昨天内容：
+一  操作系统
+广义的
+狭义的  计算机操作系统
+管理计算机资源的一款软件  
+计算机资源包括哪些？
+硬件资源   软件资源
+
+GNU项目组   unix   linux内核
+GNU/linux操作系统
+
+二 计算机语言的发展
+机器语言   汇编语言  c语言
+预处理阶段  #预处理指令
+编译  汇编  多个目标文件链接生成可执行文件
+ 链接做了什么？
+链接有几种方式？
+运行时文件是什么？
+库文件   标准库  自定义库文件
+
+三 大型项目的构建
+头文件  
+头文件卫士
+文件的包含
+宏定义
+数据类型的定义
+函数的声明
+变量的声明
+编译的基本单位是源文件
+
+补充：
+nm  二进制的文件名   查看二进制文件中的符号表
+符号表的内容有 函数的名字  全局变量的名字  静态局部变量的名字
+
+t_math$nm main.o
+00000000 T main
+         U p_add
+         U p_mul
+         U printf
+
+t_math$nm p_add.o
+00000000 T p_add
+0000000d T p_sub
+
+t_math$nm p_mul.o
+00000000 T p_div
+0000000c T p_mul
+
+T  U   相对地址  绝对地址
+
+静态链接   在生成可执行文件的时候，发生的链接
+
+今天的内容
+一 静态库的制作和使用
+库文件分为两种  静态库文件   动态库文件
+库文件的命名规则 lib库名.a   lib库名.so
+制作和使用的步骤:
+1 将要加入静态库的文件编译为目标文件
+t_math$ls
+main.c  p_add.c  p_math.h  p_mul.c
+t_math$gcc -c p_*.c
+t_math$ls
+main.c  p_add.c  p_add.o  p_math.h  p_mul.c  p_mul.o
+
+
+2 将第一步生成的目标文件打包到静态库文件
+t_math$ar -r libtp_math.a *.o
+ar: 正在创建 libtp_math.a
+t_math$ls
+libtp_math.a  p_add.c  p_math.h  p_mul.o
+main.c        p_add.o  p_mul.c
+
+
+3 使用静态库文件链接生成可执行文件
+t_math$gcc main.o -L. -ltp_math
+t_math$./a.out 
+6+2=8
+6*2=12
+
+-L路径  告诉链接器到哪个路径下找这个库文件
+-l库名  指定要找的库的名字
+
+路径  可以是绝对路径  相对路径
+ar(1) 
+
+二 环境变量
+程序 进程
+进程是程序运行的实例    程序运行一次产生一个进程
+
+所有的用户级进程构成了一颗进程树
+pstree(1)
+
+进程树  进程间的关系  父子关系  兄弟关系
+
+每个进程都维护着、自己独有的一份环境变量列表。
+环境变量是可以被子进程继承的变量
+
+bash进程的环境变量
+bash进程有两种变量   环境变量   自定义变量
+bash进程有哪些环境变量？
+env(1)
+USER=tarena    
+name=value  格式
+如何取出环境变量的值？$name
+
+echo 字符串  将字符串显示到屏幕
+
+echo $USER  
+echo tarena
+USER=laowang
+unset name
+
+grep 字符串  filename   在指定的文件中搜索字符串，将包含这个字符串的那一行输出到显示器
+
+| 管道
+command1|command2
+env|grep "USER"
+
+如何将自定义变量转换为环境变量
+export name
+
+bash使用的变量  PS1 自定义变量  PATH环境变量
+tarena@ubuntu:~$ echo $PS1
+\[\e]0;\u@\h: \w\a\]${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$
+
+指定bash的提示符
+～  用户的家目录
+bash要了解   bash执行的时候，要先执行一段脚本文件。这段脚本文件是~/.bashrc.用户可以在这个文件中设置环境变量 自定义变量的值。
+
+PATH环境变量
+day02$echo $PATH
+/home/tarena/Qt5.4.1/Tools/QtCreator/bin:/home/tarena/Qt5.4.1/5.4/gcc/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
+
+/home/tarena/Qt5.4.1/Tools/QtCreator/bin:/home/tarena/Qt5.4.1/5.4/gcc/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:.
+
+PATH=$PATH:.
+
+三 动态库的制作和使用
+制作和使用的步骤：
+1 将要加入动态库的源文件编译为与位置无关的目标文件
+与位置无关？
+gcc -fPIC -c p_mul.c p_add.c	
+t_math$ls
+main.c   p_add.o   p_mul.c
+p_add.c  p_math.h  p_mul.o
+
+
+2 将第一步生成的目标文件放入到动态库文件中
+t_math$gcc -shared -o libtp_math.so *.o
+t_math$ls
+libtp_math.so  p_add.c  p_math.h  p_mul.o
+main.c         p_add.o  p_mul.c
+
+
+3 使用动态库文件生成可执行文件
+t_math$gcc -c main.c 
+t_math$gcc main.o -L. -ltp_math
+t_math$ls
+a.out          main.o   p_math.h
+libtp_math.so  p_add.c  p_mul.c
+main.c         p_add.o  p_mul.o
+t_math$a.out 
+a.out: error while loading shared libraries: libtp_math.so: cannot open shared object file: No such file or directory
+
+动态链接器找不到a.out依赖的动态库文件。
+告诉动态链接器到指定的位置找动态库文件。
+1 通过环境变量LD_LIBRARY_PATH告诉动态链接器
+格式和PATH一样
+
+ldd 可执行程序  查看可执行程序依赖的动态库
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:.
+
+2 链接器默认的搜索路径是/lib或者/usr/lib
+
+
+静态链接  动态链接
+
+#include <>  ""的区别
+<>  从系统指定的路径下找头文件   系统指定的路径是哪里？
+“”  从当前路径下找头文件，找不到再到系统指定的路径下找。
+
+
+
+
+
+四 动态加载  
+
+
+
+
+
