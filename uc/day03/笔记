@@ -1,0 +1,123 @@
+回顾昨天内容：
+一  静态库的制作和使用
+静态链接
+lib库名.a
+1 2 3
+#include <> ""
+
+二 环境变量
+每个进程都有自己的一个环境变量列表。
+bash进程的环境变量和自定义变量
+操作
+PS1  PATH
+bash进程启动的时候，先执行一段脚本文件  ~/.bashrc
+
+三 动态库的制作和使用
+动态链接  
+ldd  动态链接器
+运行时文件   系统已经写好的多个目标文件
+
+今天的内容：
+一  动态加载
+按需加载   程序执行的过程中，需要使用到动态库中的函数的时候，再将动态库加载到内存，这种加载动态库的方式称为动态加载。
+动态链接器提供了接口。
+dlopen(3)  dlclose(3)  dlerror(3)  dlsym(3)
+
+#include <dlfcn.h>
+void *dlopen(const char *filename, int flags);
+功能：打开一个共享库文件
+参数：
+filename:指定了要加载的共享库的名字
+flags:
+RTLD_LAZY  懒绑定
+RTLD_NOW   立即绑定
+返回值：
+NULL   失败    可以使用dlerror(3)获取错误的信息
+非NULL   成功   
+
+
+
+void *p;  
+int dlclose(void *handle);
+功能：关闭一个共享库文件  让共享库的引用计数减一
+参数：
+handle:指定了加载的共享库
+返回值：
+成功   0
+失败   非0  可以使用dlerror(3)获取错误的信息
+Link with -ldl.
+
+举例说明   使用动态链接器动态加载共享库文件
+代码参见  dynamic.c
+
+获取错误的诊断信息
+dlerror(3)
+#include <dlfcn.h>
+char *dlerror(void);
+功能：获取最近一次动态链接器接口调用失败的信息
+参数：
+返回值：
+NULL  没有错误发生
+字符串的首地址   字符串就是最近调用dlopen API产生的错误信息
+
+
+dlsym(3)
+void *dlsym(void *handle, const char *symbol);
+功能：获取符号加载到内存的地址
+参数：
+handle:dlopen(3)的返回值
+symbol:指定要找的符号的名字
+返回值：
+NULL   代表没有找到这个符号
+成功  返回符号加载到内存的地址
+
+二  程序中的错误处理
+
+系统维护着一个全局变量 int  errno；当系统调用或者库函数调用发生错误的时候，将错误的编号记录到errno中，然后根据错误的编号找到产生错误的原因。
+案例参见   file.c
+根据errno的值获取错误的原因
+strerror(3)
+ 
+#include <string.h>
+char *strerror(int errnum);
+功能：获取错误编号对应的错误秒数信息
+参数：
+errnum：指定错误编号
+返回值：
+Unknown error nnn   如果这个错误编号系统没有指定返回
+成功  返回描述错误原因的字符串
+
+
+perror(3)
+ 
+#include <stdio.h>
+void perror(const char *s);
+功能：输出错误信息
+参数：
+s:用户指定的字符串
+返回值：void
+
+FILE *stdin   标准输入   键盘
+FILE *stdout   标准输出  显示器
+FILE *stderr   标准错误输出  显示器
+
+三  内存管理
+ 
+
+物理地址   虚拟地址
+每个进程都有自己独立的4G的虚拟地址空间
+3G  用户态   1G 内核态
+页  页框  页表
+
+数据区间 代码区间  栈区间   section
+
+数据段  代码段  栈段
+
+
+
+
+
+
+
+
+
