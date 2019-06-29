@@ -1,0 +1,214 @@
+回顾昨天内容：
+一  内存管理(续)
+代码段  数据段  栈段  堆
+栈段   栈帧   每个函数的运行都对应一个栈帧
+函数运行完毕，栈帧自动释放。
+堆  
+自动的本地局部变量  函数的形参  栈帧
+全局变量  静态局部变量   数据段
+static   local   global
+变量的作用域   生命周期
+进程的映像
+
+今天的内容：
+一  文件的操作
+fopen(3)   fclose(3)  fread(3)  ...   标准库函数
+open(2)  close(2)  read(2)  write(2) lseek(2)
+系统调用
+
+open(2)
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+int open(const char *pathname, int flags,...);
+功能：打开，有可能创建一个文件
+参数：
+pathname:指定了要打开的文件的路径
+flags:
+三选一：
+O_RDONLY   只读方式打开  
+O_WRONLY   只写方式打开  
+O_RDWR     可读可写方式打开
+
+文件的创建标记和身份标记可以被按位或到flags中
+文件的创建标记      
+O_CREAT   如果文件不存在，创建文件，通过mode这个参数，传递新文件的权限
+     
+O_EXCL 如果和O_CREAT一起指定，文件存在，失败 
+O_TRUNC  如果要打开的文件存在，将文件的内容清空。
+O_APPEND  以追加的方式打开文件  每次写之前，读写位置重定位在文件的末尾
+
+...:
+mode  
+返回值：
+成功   返回新的文件描述符
+失败  -1  errno被设置为相应错误码
+
+
+补充：
+1  可变参数
+int printf(const char *format, ...);
+printf("hello beijing");
+printf("val=%d\n",val);
+printf("name=%s\t age=%d\n",name,age);
+带有可变参数的函数被调用的时候，可变参数的个数和类型取决于最靠近可变参数的那个参数
+2 文件描述符
+小的  非负整数
+每个进程都有自己的pid还有自己的PCB。（proccess control blcok）
+最小的 未使用的
+
+3 文件的权限
+-rw-rw-r-- 1 tarena tarena 0 Jun 29 10:12 hello
+
+指定文件的类型
+  -   普通文件
+  d   文件夹文件
+  c   字符设备文件
+  b   块设备文件
+  s   socket文件
+  p   管道类型的文件
+  l   软链接文件
+
+rw-rw-r--
+rwx     rwx    rwx
+属主    属组    其他人
+u        g       o       a
+rw-------
+rw-rw-r--
+110,110,100
+6   6    4
+
+0664
+
+664
+001
+
+4 进程的umask
+权限掩码
+day05$umask
+0002
+
+
+-------w-
+rw-rw-rw-
+rw-rw-r--
+
+mode & ~umask
+000000010
+111111101
+110110110
+110110100
+
+5 文件描述符 
+0   标准输入  STDIN_FILENO
+1   标准输出   STDOUT_FILENO
+2   标准错误输出 STDERR_FILENO
+
+close(2)
+#include <unistd.h>
+int close(int fd);
+功能：关闭文件描述符
+参数：
+fd:指定了要关闭的文件描述符
+返回值：
+成功   0
+错误  -1   errno被设置为相应错误码
+
+
+举例说明   
+1  以只读方式打开文件，如果发生错误，输出错误原因。
+文件的名字通过命令行第一个参数传递
+r_file.c
+
+
+2 以写的方式打开文件，文件不存在，创建文件，指定新文件的权限为0644；如果文件存在，报错。如果发生错误，输出错误原因。
+文件的名字通过命令行第一个参数传递
+we_file.c
+
+
+
+3 以写的方式打开文件，文件不存在，创建文件，指定新文件的权限为0644；如果文件存在，将文件的内容清空。如果发生错误，输出错误原因。
+文件的名字通过命令行第一个参数传递
+wt_file.c
+
+
+read(2)/write(2)
+#include <unistd.h>
+ssize_t read(int fd, void *buf, size_t count);
+功能：从文件读取数据，将读取到的数据存放到buf中
+参数：
+fd:指定具体的文件描述符，从这个文件描述符指定的文件中读取数据
+buf:将读取到的数据存放到buf中
+count:请求读取的字节数
+返回值：
+失败  -1  errno的值被设置
+成功  实际读取到的字节数返回  0  代表文件的末尾
+
+ssize_t  write(int  fd,const void *buf,size_t count);
+功能：向文件写入数据
+参数：
+fd:指定文件的描述符
+buf:向文件写入的数据存放在buf指定的地址空间里
+count:请求写入的字节数
+返回值：
+成功   返回实际写入文件的字节数
+失败  -1  errno被设置
+
+编写代码实现cat file命令的功能。编译生成p_cat可执行程序。
+代码参见 p_cat.c
+
+off_t lseek(int fd, off_t offset, int whence);
+功能：重新定位文件的读写位置
+参数：
+fd:
+offset:
+
+
+whence:
+SEEK_SET 
+SEEK_CUR
+SEEK_END
+
+返回值：
+
+二  文件描述符的复制
+dup(2)  dup2(2)
+ 
+#include <unistd.h>
+int dup(int oldfd);
+功能：复制文件描述符 新建的描述符使用最小的、未使用的作为新描述符
+参数：
+oldfd:指定了源描述符
+返回值： 
+错误   -1  errno被设置为相应错误码
+成功  返回新的文件描述符
+    
+int dup2(int oldfd, int newfd);
+功能：复制文件描述符 如果目标文件描述符原来是打开的，先关闭。再使用
+参数：
+oldfd:指定源描述符
+newfd:指定新的描述符
+返回值：
+错误   -1  errno被设置为相应错误码
+成功  返回新的文件描述符
+
+举例说明  使用文件描述符的复制实现文件输出重定向
+代码参见  redirect.c
+
+cp src_file dst_file
+编写代码实现cp拷贝文件的功能
+p_cp 
+
+
+三  将文件映射到进程的地址空间
+
+
+
+
+
+
+
+
+
+
+
