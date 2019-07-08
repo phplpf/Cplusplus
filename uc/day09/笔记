@@ -1,0 +1,195 @@
+回顾昨天内容：
+一 遗言函数  on_exit(3)
+注意的是遗言函数的类型
+二 进程资源的回收
+wait(2) waitpid(2)
+进程和进程组 
+孤儿进程   僵尸进程
+三  进程映像的更新
+进程的映像是什么？
+mmap(2)
+exec(3)
+列表   向量表
+环境变量 
+bash进程 
+今天的内容；
+一  环境变量的操作
+  程序中使用库函数对环境变量进行操作
+  getenv(3)  setenv(3)  unsetenv(3)  clearenv(3)
+  #include <stdlib.h>
+  char *getenv(const char *name);
+  功能：在环境变量列表中找name的值
+  参数：
+	name:指定要找的环境变量的名字
+  返回值：
+	NULL  没有找到
+        name的value对应的字符串的首地址
+
+setenv(3)
+#include <stdlib.h>
+int setenv(const char *name,const char *value,\
+		int overwrite);
+功能：改变环境变量的值或添加一个环境变量
+参数：
+name:指定了环境变量的名字
+value:指定了环境变量的值
+overwrite:环境变量存在的情况下，才使用这个参数  
+非0   使用val的值改变环境变量原来的值
+0    环境变量的值不变
+返回值：
+成功  0
+错误  -1 errno被设置
+
+int unsetenv(const char *name);
+功能：删除一个环境变量
+参数：
+name:指定要删除的环境变量的名字
+返回值：
+成功  0
+错误  -1 errno被设置
+
+ 
+#include <stdlib.h>
+int clearenv(void);
+功能：清除环境变量列表，全局变量environ设置为空
+返回值：
+成功  0
+错误  非0
+
+二  管道（进程间通讯）
+管道分为两种  无名官道   有名管道
+管道也是一种设备，用于进程间通信。可以看成是文件。
+无名管道  用于具有亲缘关系的进程间通讯  父子关系  兄弟关系
+ 
+#include <unistd.h>
+int pipe(int pipefd[2]);
+功能：创建一个管道
+参数：
+pipefd:  pipefd[0]  指向了管道的读端
+         pipefd[1]  指向了管道的写端
+返回值：
+成功  0
+错误  -1  errno被设置为相应的错误码
+单向的数据隧道
+
+举例说明 使用无名管道实现进程间的通讯
+步骤：
+1 创建管道，返回两个文件描述符
+2 创建子进程，子进程继承父进程的文件描述符
+3 父进程负责的任务（向管道写数据）
+    关闭管道的读端
+    向管道写入数据
+    关闭写端
+    回收子进程的资源
+4 子进程负责的任务（从管道读取数据，将读取到的数据输出到显示器）
+    关闭写端
+    从管道的读端读取数据到buf。
+    将 buf的内容输出到显示器
+    关闭读端
+    终止子进程
+
+有名管道
+是一种文件的类型。这种类型的文件有一些特点。文件的内容始终为0.进程可以借助这种类型的文件实现进程间的通讯。
+
+如何创建管道类型的文件呢？
+mkfifo(3)
+
+#include <sys/types.h>
+#include <sys/stat.h>
+int mkfifo(const char *pathname, mode_t mode);
+功能：创建一个管道类型的文件
+参数：
+pathname:指定了管道类型的文件名字
+mode:指定了 新建文件的权限
+返回值：
+成功  0
+错误  -1  errno被设置
+
+三  信号的基础
+  什么是信号？信号就是软中断。
+  中断 硬件中断
+  软件实现的中断机制
+  中断有中断处理程序
+  信号  信号处理程序
+  kill -l
+  信号的名字  信号编号
+   信号的产生   信号的阻塞  递达给进程  信号处理
+   信号的未决状态   未决就是未处理
+ 进程默认从父进程继承信号处理函数
+进程对每个信号都设置了一个信号处理程序。默认值。
+
+四  信号处理程序的注册
+如何给进程注册一个信号处理函数呢？
+signal(2)
+ 
+#include <signal.h>
+typedef void (*sighandler_t)(int);
+sighandler_t signal(int signum, sighandler_t handler);
+功能：向进程注册信号处理函数
+参数：
+signum:指定了信号编号
+handler:
+SIG_IGN    忽略
+SIG_DFL   缺省
+用户自定义的函数
+返回值：
+SIG_ERR   错误  errno被设置
+成功   返回原来的处理函数的值
+
+五  信号的产生
+1 硬件产生信号  ctrl+c   ctrl+\ ...
+2 使用linux命令给进程发送信号  kill
+3 使用库函数或者系统调用给进程发送信号
+kill(2)   raise(3)  alarm(2)
+
+#include <sys/types.h>
+#include <signal.h>
+int kill(pid_t pid, int sig);
+功能：给进程发送信号
+参数：
+pid:指定了接收信号的进程的pid
+sig:指定了具体的信号编号
+返回值：
+成功   0
+错误  -1  errno被设置
+
+kill -信号编号  进程的pid
+编写程序实现kill命令的功能。
+p_kill 信号编号 pid
+kill(getpid(),8)---->raise(3)
+
+#include <unistd.h>
+unsigned int alarm(unsigned int seconds);
+功能：
+参数：
+seconds:指定具体的秒数。如果seconds指定为0，
+
+取消所有的未决闹钟。
+
+返回值：
+0   原来的闹钟没有了
+原来闹钟剩余的时间
+
+#include <unistd.h>
+int pause(void);
+功能：一直睡觉，直到信号打断。
+返回值：
+信号被捕获，信号处理函数被调用之后，猜返回，返回-1，errno被设置
+
+
+
+使用alarm(2)和pause(2)来完成sleep(3)函数的功能。
+
+#include <unistd.h>
+unsigned int p_sleep(unsigned int seconds);
+
+
+
+
+
+
+
+
+
+
+

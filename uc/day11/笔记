@@ -1,0 +1,197 @@
+回忆上次课程的内容：
+一 信号的阻塞和未决信号
+信号集类型  类型相关的操作
+信号的阻塞    进程的信号掩码集  sigprocmask(2) 
+信号阻塞和信号忽略   可靠信号   不可靠信号
+未决信号 信号已经产生了，但是还没有处理  未决信号
+进程维护着一个未决信号集，对于这个进程来说，还没有处理的信号，就是这个进程的未决信号。sigpending(2)
+二  网络的基础知识
+TCP/IP协议   
+四层或者五层
+应用层  传输层  网络层  链路层
+
+mac地址   网卡的物理地址
+以太网帧  ip报文   tcp包 
+ip地址    分类  网络号+主机号
+如何获取一个ip地址的网络号？
+子网掩码   
+
+
+127.0.0.1
+ifconfig   ping  arp -a   route
+路由表   arp表
+
+
+
+今天的内容：
+一  网络的基础知识
+跨网段数据的传输
+
+default         172.40.51.1     0.0.0.0         UG    100    0        0 ens33
+link-local      *               255.255.0.0     U     1000   0        0 ens33
+172.40.51.0     *               255.255.255.0   U     100    0        0 ens33
+
+192.168.0.0     192.168.0.1
+二  基于TCP的网络编程实现
+传输层分为两类  TCP  UDP
+
+TCP  是基于连接的   安全  可以重传的机制 传输效率相对来说比较低
+
+UDP  基于数据包的  不可靠  丢包的现象  传输效率极高
+基于tcp的网络传输，在客户端和服务器端传输之前必须先建立连接
+三次握手
+
+服务器端的编程模型
+1  创建一个通讯设备，返回该设备的文件描述符 sfd   socket(2)
+2  将sfd和服务器的ip地址 端口号进行绑定  bind(2)
+3  将sfd设备设置为被动连接状态，监听客户端连接的到来，客户端连接到来的时候，将连接放入到未决连接队列里  listen(2)
+while(1){
+	4 从设备的未决连接队列里取出一个进行处理，返回连接描述符。
+          accept(2)
+	5 从连接描述符读取客户端的请求数据  read(2)
+	6  处理客户端的请求数据
+	7 将处理结果回应客户端 write(2)
+        8 关闭本次连接  close(2)
+}
+
+客户端的编程模型
+1  创建一个通讯设备，返回该设备的文件描述符 sfd   socket(2)
+2  使用sfd向服务器发起连接   connect(2)
+3  连接成功后，向服务器发送请求消息  write(2)
+4  等待服务器的回应消息read(2)
+5  处理服务器的响应消息
+6  关闭设备 close(2)
+
+socket(2)  bind(2)  listen(2)  accept(2)  connect(2)
+
+#include <sys/types.h>          /* See NOTES */
+#include <sys/socket.h>
+int socket(int domain, int type, int protocol);
+功能：创建一个通讯端点，返回一个文件描述符
+参数：
+domain:
+ AF_INET        IPv4 Internet protocols          ip(7)
+ AF_INET6       IPv6 Internet protocols          ipv6(7)
+
+
+type:
+SOCK_STREAM  有序的  可靠的 双向的 基于连接的字节流 TCP
+SOCK_DGRAM  无连接的  面向数据包的 不可靠的   UDP
+protocol:  0
+
+返回值：
+成功   返回一个新的描述符   用于通讯端点的描述符
+失败   -1  errno被设置
+
+int bind(int sockfd, const struct sockaddr *addr,
+                socklen_t addrlen);
+功能：将通讯端点和IP地址端口号绑定（本地的）
+参数：
+sockfd:指定了具体的通讯端点
+addr: 指定了服务器的ip地址和端口
+addrlen: 指定了addr空间的有效长度
+返回值：
+成功   0
+错误  -1  errno被设置
+
+通用地址结构体
+struct sockaddr{
+	sa_family_t sa_family;
+        char        sa_data[14];
+
+};
+具体地址结构体  ipv4  ipv6  ...？
+#include <netinet/in.h>
+struct sockaddr_in {
+       sa_family_t  sin_family;/*address family: AF_INET */
+       in_port_t  sin_port;   
+			/* port in network byte order */
+       struct in_addr sin_addr;   /* internet address */
+};
+
+/* Internet address. */
+struct in_addr {
+    uint32_t  s_addr; /* address in network byte order */
+};
+
+in_port_t  uint16_t
+           uint32_t
+
+struct sockaddr_in serv;
+serv.sin_family=AF_INET;
+serv.sin_port=htons(5577); 5577  从主机字节序<--->网络字节序
+
+htonl(3)
+#include <arpa/inet.h>
+uint32_t htonl(uint32_t hostlong);
+uint16_t htons(uint16_t hostshort);
+uint32_t ntohl(uint32_t netlong);
+uint16_t ntohs(uint16_t netshort);
+  to   h host n net l long  s short
+
+serv.sin_addr.s_addr   网络字节序的无符号整型  binary
+  192.168.1.5    点分十进制的字符串    text
+  text<---->binary
+  
+inet_pton(3)  inet_ntop(3)
+
+#include <arpa/inet.h>
+const char *inet_ntop(int af, const void *src,
+                             char *dst, socklen_t size);
+功能：binary--->text
+参数：
+af:AF_INET IPV4
+src:binary格式的地址
+dst:存储转换后的结果
+size:指定了dst空间的有效大小
+返回值：
+NULL   错误  errno被设置
+成功  非NULL的地址
+
+int inet_pton(int af, const char *src, void *dst);
+功能：text---->binary
+参数：
+af: AF_INET
+src:点分十进制的字符串
+dst: 将转换后的结果存储到这里
+返回值：
+1   成功
+0   指定的字符串无效
+-1  地址家族错误  errno被设置
+
+int listen(int sockfd, int backlog);
+功能：将sockfd设置为被动连接状态，监听客户端连接的到来。连接到来的时候，将连接放入到未决连接队列中。
+参数：
+sockfd:指定了具体的通讯设备，也就是在这个设备上监听
+backlog:指定了设备的未决连接队列的最大长度
+返回值： 
+成功   0
+错误  -1  errno被设置
+ 
+#include <sys/types.h>          /* See NOTES */
+#include <sys/socket.h>
+int accept(int sockfd, struct sockaddr *addr,\
+	 socklen_t *addrlen)
+功能：在设备上接收一个连接。从未决连接队列里提取第一个，创建一个新的连接描述符。使用这个新的连接描述符和客户端进行通讯。
+参数：
+sockfd:指定了具体的通讯设备，也就是从这个设备的未决连接队列中取第一个未决连接。
+addr: 将客户端的ip地址和端口号保存到这个空间里。如果addr为NULL，addrlen也设置为NULL。
+addrlen:  值-结果参数  指定了addr空间的有效大小  返回实际的值，是客户端地址的有效长度。
+返回值： 
+错误  -1  errno被设置
+成功  返回一个新的连接描述符
+
+int connect(int sockfd, const struct sockaddr *addr,
+                   socklen_t addrlen);
+
+功能：在socket上发起一个连接
+参数：
+sockfd:指定socket
+addr: 指定服务器的ip地址和端口号
+addrlen:指定了addr的空间大小
+返回值：
+成功  0
+错误 -1   errno被设置
+setsockopt(2)
+
+

@@ -1,0 +1,162 @@
+回忆昨天内容：
+一 文件的操作
+获取文件的元数据   文件的类型   文件的权限
+二 文件夹的操作
+opendir(3)  closedir(3)  readdir(3)
+文件夹的权限
+三 文件操作的杂项  access(2)   getcwd(3)  mkdir(2)...
+四 进程的基础知识
+进程树   树根  pstree(1) ps -aux  top
+每个进程都有自己的pid，也有自己的PCB。PCB  fd  image environ
+五 新建进程
+fork(2)  父进程   子进程 异步的
+六 进程的终止
+1 return和exit(3)
+2 遗言函数
+
+什么是遗言函数？向进程注册遗言函数。
+atexit(3)  on_exit(3)
+#include <stdlib.h>
+int on_exit(void (*function)(int , void *), void *arg);
+功能：向进程注册遗言函数
+参数：
+function:遗言函数的名字，遗言函数的入口地址
+arg：被传递给遗言函数，作为遗言函数的第二个参数
+返回值：
+成功   0
+错误   非0
+
+void (*function)(int , void *)
+
+今天的内容：
+一 遗言函数(续)
+on_exit(3)
+
+二 进程资源的回收
+	wait(2)家族的函数
+ 
+#include <sys/types.h>
+#include <sys/wait.h>
+pid_t wait(int *status);
+功能：阻塞等待回收子进程的资源（任意子进程）
+参数：
+status:将子进程的退出状态码存储到status指向的地址空间里
+可以使用以下宏检测这个退出状态码
+WIFEXITED(status)  子进程正常终止的时候，返回真
+WEXITSTATUS(status) 只有在上个宏为真的时候，才能使用。获取子进程的退出状态码
+WIFSIGNALED(status) 如果子进程是被信号打断，返回真
+WTERMSIG(status) 只有在上个宏返回真的情况下，才能使用，获取子进程是被几号信号打断的
+
+返回值：
+错误   -1  errno被设置
+成功   返回终止了的子进程的pid
+
+pid_t waitpid(pid_t  pid,int *status,int options);
+功能:等待回收子进程的资源。
+参数：
+pid:指定要等待的子进程的pid
+<-1  |pid|是一个进程组的id。等待这个进程组里的子进程终止
+-1   等待任意子进程
+0    等待和父进程同组的子进程的终止
+>0  指定要等的子进程的pid
+
+status:完全等价于wait(2)的参数
+options:
+WNOHANG  如果没有子进程终止，立即返回
+0   阻塞等待子进程的终止
+返回值：
+ 错误  -1  errno被设置
+ 成功  返回状态改变了的子进程的pid 
+      如果有要等的子进程，但是这些子进程没有终止的，如果WNOHANG被指定，返回0
+ 
+
+wait(&s)====waitpid(-1,&s,0);
+
+僵尸进程  进程已经终止了，但是还没有回收进程的资源，这时候，进程处于僵尸状态，这样的进程称为僵尸进程。占有内核空间。
+举例说明   代码参见  wait.c
+如何给进程发送信号？
+kill -信号编号  pid
+
+僵尸进程  zombie.c
+孤儿进程  子进程创建以后，都会上树。如果子进程的父进程已经终止，子进程会过继给1号进程。这样的子进程称为孤儿进程。
+代码参见  orphan.c
+	
+进程组  一个进程组中包含多个进程。每个进程组都有一个leader.leader进程的pid就是这个进程组的id  一般情况下，子进程和父进程同组。
+
+
+三 进程映像的更新
+什么是进程的映像？
+	fork(2)以后，父进程和子进程的映像完全一样。
+     execve(2)    exec(3)
+       			
+#include <unistd.h>
+int  execve(const  char  *filename, char *const argv[],
+                  char *const envp[]);
+功能：程序的执行
+参数：
+filename:指定了映像文件的路径。可执行文件。
+argv:传递给新的程序的参数 字符串列表
+envp:传递给新的进程的环境变量列表
+字符串列表最后一个元素必须是NULL。
+返回值：
+成功  不返回
+失败  -1  errno被设置
+
+int main(int argc, char *argv[], char *envp[])
+
+#!/bin/bash    bash脚本文件的开始
+#！/usr/bin/python  python程序
+
+exec(3)家族的函数
+#include <unistd.h>
+extern char **environ;  //是一个全局变量，指向了当前进程的环境变量列表。
+
+  int execl(const char *path, const char *arg, ...
+                       /* (char  *) NULL */);
+  int execlp(const char *file, const char *arg, ...
+                       /* (char  *) NULL */);
+  int execle(const char *path, const char *arg, ...
+                       /*, (char *) NULL, char * const envp[] */);
+  int execv(const char *path, char *const argv[]);
+  int execvp(const char *file, char *const argv[]);
+  int execvpe(const char *file, char *const argv[],
+                       char *const envp[]);
+  exec(3)
+   exec
+   l  list
+   v  vector
+   p  PATH环境变量 
+   e  环境变量
+   向量表   列表
+  举例说明  进程映像的更新
+  代码参见 exec.c  
+  day08$ps -o pid,ppid,pgrp,comm
+  PID  PPID  PGRP COMMAND
+ 2658  2652  2658 bash
+19720  2658 19720 ps
+
+使用全局变量遍历进程所有的环境变量
+char **environ;
+p_env.c
+int main(int argc, char *argv[], char *envp[])
+p_env1.c
+
+
+执行a.out的时候，发生了什么？
+bash--->fork(2)--->exec(3)
+		|---->wait(2)
+a.out  和bash
+ls  cat  ps 
+bash命令分为两种  外部命令 内部命令
+内部命令是bash程序的一部分，执行的时候，不需要fork
+如何区分命令是内部命令还是外部命令？
+type command
+  ls -l
+  fork(2)--->exec()
+	
+四 环境变量
+	
+	
+
+
+	
