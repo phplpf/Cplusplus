@@ -1,0 +1,83 @@
+回顾上次课程内容：
+一 文件的操作
+库函数 fopen(3)   fclose(3)  fread(3)...
+系统调用   open(2)  close(2)  read(2) write(2) lseek(2)
+
+可变参数
+文件的类型
+文件的权限
+umask
+进程  进程控制块  文件描述符
+
+二 文件描述符的复制
+dup(2)  dup2(2)
+数据流的重定向
+
+
+
+今天的内容：
+一  将文件映射到进程的地址空间
+1 将一物理地址映射到进程的虚拟地址空间
+mmap.c
+
+2 将文件映射到进程的虚拟地址空间，对内存内容的修改直接反应到底层的文件中
+
+mmap_file.c
+
+
+mmap(2)/munmap(2)
+
+#include <sys/mman.h>
+void *mmap(void *addr, size_t length, int prot, int flags,
+                  int fd, off_t offset);
+功能：将文件或设备映射到进程的虚拟地址空间
+参数：
+addr：指定了映射区域在进程的虚拟地址空间里的起始地址
+如果addr为NULL，内核选择进程的虚拟地址，在这个地址上映射文件或设备
+
+length:指定了映射区域的长度
+
+prot:
+PROT_EXEC  Pages may be executed.
+PROT_READ  Pages may be read.
+PROT_WRITE Pages may be written.
+PROT_NONE  Pages may not be accessed.
+
+flags: 二选一
+MAP_SHARED：共享映射区域   对映射区域内容的修改同步到底层的文件中，可以被映射同一区域的进程看见。
+
+MAP_PRIVATE：私有映射    写时拷贝
+
+MAP_ANONYMOUS可以被或到flags中
+fd=-1和offset被忽略
+
+fd:指定了要映射的文件的描述符
+offset:指定了文件的起始地址 必须是4k的整数倍
+
+返回值：       
+MAP_FAILED  错误    errno被设置为相应的错误码
+成功   返回映射区域的起始地址
+
+int munmap(void *addr, size_t length);
+功能：解除文件或设备到进程的虚拟地址空间的映射
+参数：
+addr：指定了映射区域的起始地址
+length:指定了映射区域的长度
+返回值：
+成功   返回0
+错误  -1  errno被设置
+
+补充：
+1 
+day06$od -tx1 -tc hello
+0000000  68  65  6c  6c  6f  0a
+          h   e   l   l   o  \n
+0000006
+
+
+
+二  获取文件的元数据
+三  文件夹的操作
+
+
+
