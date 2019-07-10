@@ -1,0 +1,203 @@
+回顾昨天内容：
+一  基于TCP的数据的传输
+业务封装  一次连接多次通讯  
+二 并发服务器的实现
+多进程实现  父进程  子进程
+三 基于udp的编程实现
+模型  recvfrom(2)  sendto(2)
+TCP/UDP  
+四  线程的基础知识
+一个进程中包含多个线程。进程是资源分配的基本单位  线程是执行的基本单位 线程函数
+进程中的线程共享进程的资源
+每个线程也有自己私有的资源 
+五  线程的创建
+pthread_create(3)
+
+今天的内容：
+一 线程的创建（续）
+pthread_self(3)
+#include <pthread.h>
+pthread_t pthread_self(void);
+功能：获取当前线程的id
+返回值：
+返回当前线程的id。
+
+二 线程的终止 分离  汇合
+1 return和exit(3)的区别
+2 pthread_exit(3)
+void pthread_exit(void *retval);
+功能：终止当前线程
+参数：
+retval:将线程的退出状态码填充到retval的空间里，同一进程中另外一个线程汇合的时候，接收这个值
+返回值：
+
+3  线程的分离
+pthread_detach(3)
+int pthread_detach(pthread_t thread);
+功能：分离一个线程。被分离的线程，在终止的时候，将资源自动释放给系统，不需要其他线程汇合这样的线程。
+参数：
+thread:指定了要被标记为分离的线程的id
+返回值：
+成功  0
+错误   错误码
+4 线程汇合
+ pthread_join(3)
+int pthread_join(pthread_t thread, void **retval);
+功能：汇合一个已经终止了的线程。
+如果要汇合的线程已经终止，立即返回。
+如果要汇合的线程还没有终止，阻塞等待直到目标线程终止。
+参数：
+thread: 指定了线程的id。要汇合这个线程
+retval:*retval地址。将thread指定的线程的退出状态吗存储到*retval地址里。
+
+返回值：
+成功   0
+错误  非0的错误码
+ 
+注意：void **retval;
+int ***p; ++p++++--  二货的
+
+5  取消线程的执行
+int pthread_cancel(pthread_t thread);
+功能：给指定线程发送取消请求
+参数：
+thread:指定被取消线程的tid
+返回值：
+成功  0
+错误   非0的错误码
+
+PTHREAD_CANCELED  收到的被取消线程的退出状态码
+
+三 线程同步  mutex锁   条件变量   信号量
+可重入函数   不可重入函数
+临界资源  原子操作
+
+mutex锁
+什么是mutex锁？
+是一个互斥设备。用于对共享数据同时修改的时候，监察和监控
+
+这个设备有两种状态 
+unlocked  不被任何线程拥有
+locked  被一个线程拥有
+pthread_mutex_t  mutex锁类型
+
+关于mutex锁的操作
+pthread_mutex_t fastmutex = PTHREAD_MUTEX_INITIALIZER;
+静态初始化一个mutex对象。
+
+int  pthread_mutex_init(pthread_mutex_t *mutex,\
+	 const pthread_mutexattr_t *mutexattr);
+功能：使用属性初始化mutex对象
+参数：
+mutex:  指定要初始化的mutex对象
+mutexattr:NULL   使用缺省的属性
+返回值：
+总是0
+
+int pthread_mutex_lock(pthread_mutex_t *mutex);
+功能：加锁
+参数：
+mutex:指定要操作的mutex锁
+
+返回值：
+成功   0
+错误   非0的错误码
+
+int pthread_mutex_trylock(pthread_mutex_t *mutex);
+功能：尝试加锁
+参数：
+mutex:
+
+返回值：
+成功   0
+错误   非0的错误码
+int pthread_mutex_unlock(pthread_mutex_t *mutex);
+功能：解锁
+参数：
+mutex:指定要操作的锁
+
+返回值：
+成功   0
+错误   非0的错误码
+int pthread_mutex_destroy(pthread_mutex_t *mutex);
+功能：销毁mutex对象，释放mutex hold的资源
+参数：
+mutex:指定要销毁的mutex对象
+
+返回值：
+成功   0
+错误   非0的错误码
+
+
+条件变量
+pthread_cond_t  条件变量类型
+什么是条件变量？
+条件变量是一个同步设备
+signal the condition  条件满足的时候
+wait  for the  condition   等待条件满足
+
+条件变量的相关操作
+pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
+//条件变量的静态初始化
+
+int  pthread_cond_init(pthread_cond_t *cond, 			pthread_condattr_t *cond_attr);
+功能：初始化一个条件变量
+参数：
+cond:指定要初始化的条件变量的地址
+cond_attr:NULL  缺省属性
+返回值：
+
+int pthread_cond_signal(pthread_cond_t *cond);
+功能：从等待条件为真的多个线程中选择其中之一执行。如果没有线程等待条件为真，什么都不做。
+参数：
+cond：指定了条件变量。线程在这个条件变量上等待
+返回值：
+
+int pthread_cond_broadcast(pthread_cond_t *cond);
+功能：等待线程为真的所有的线程都被启动。如果没有线程等待条件变为真，什么都不做。
+参数：
+cond:指定具体的条件变量。线程在这个条件变量上等待
+返回值：
+
+int  pthread_cond_wait(pthread_cond_t  *cond,   		pthread_mutex_t *mutex);
+功能：原子的接mutex锁并且等待条件cond变为真。让出了cpu。在当前线程返回之前，重新加锁mutex。
+参数：
+cond:指定具体的cond
+mutex:指定具体的mutex
+返回值：
+
+int pthread_cond_timedwait(pthread_cond_t *cond,
+       pthread_mutex_t *mutex, 
+	const struct timespec *abstime);
+功能：
+
+int pthread_cond_destroy(pthread_cond_t *cond);
+功能：销毁指定的条件变量 释放条件变量hold的资源
+参数：
+cond:指定要销毁的条件变量的地址
+返回值：
+成功   0
+错误   非0的错误码
+
+使用条件变量实现生产者和消费者
+使用到的数据结构  链表
+将生产的新节点插入到链表的头部   生产线程
+消费线程   负责从链表的头部取出一个节点，消费掉这个节点
+
+
+
+
+四 system v ipc
+消息队列  共享内存 信号量集
+
+
+
+
+
+
+
+
+
+
+
+
