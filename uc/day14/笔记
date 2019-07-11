@@ -1,0 +1,133 @@
+回顾昨天的内容：
+一  线程创建  同一进程中包含多个线程  pthread_self(3)
+二  线程终止 分离 汇合
+1 return和exit(3)的区别
+2 pthread_exit(3)  终止当前线程
+3 pthread_cancel(3)  取消线程  PTHREAD_CANCELED
+4 线程的分离   被分离的线程终止以后，自动的将资源释放给系统。
+pthread_detach(3)
+5 线程的汇合   pthread_join(3)  如果要汇合的线程没有终止，阻塞等待
+。如果要汇合的线程已经终止，立即返回。同时回收线程的终止状态码。
+三 线程同步
+可重入函数  不可重入函数
+临界资源
+mutex 锁
+pthread_mutex_t  类型
+什么是mutex锁？mutex锁的相关操作   lock   unlock
+
+条件变量
+pthread_cond_t  条件变量类型
+什么是条件变量？条件变量的相关操作  signal   wait
+pthread_cond_wait(3)
+今天的内容：
+一 信号量
+sem_t 信号量类型
+什么是信号量？
+信号量是一个不小于0的整数。
+信号量的相关操作  增加信号量的值   减少信号量的值
+
+sem_init(3)  sem_wait(3)  sem_post(3)  sem_destroy(3)
+#include <semaphore.h>
+int sem_init(sem_t *sem, int pshared, unsigned int value);
+功能：初始化一个匿名信号量
+参数：
+sem:指定了信号量的地址
+pshared:  0   多线程   非0  多进程
+value:指定了用于信号量的初始值
+返回值：
+成功 0 
+失败 -1  errno被设置     
+
+
+Link with -pthread.
+
+int sem_destroy(sem_t *sem);
+功能：销毁信号量
+参数：
+sem:指定要被销毁的信号量的地址
+返回值：
+成功  0
+错误  -1  errno被设置
+
+int sem_post(sem_t *sem);
+功能：unlock 操作   加法操作
+参数：
+sem:指定被操作的信号量的地址
+返回值：
+成功  0
+错误  -1  errno被设置  信号量的值不变
+
+int sem_wait(sem_t *sem);
+功能：减法操作
+参数：
+sem 指定具体的信号量的地址
+返回值：
+成功  0
+错误  -1  errno被设置 信号量的值不变
+int sem_trywait(sem_t *sem);
+
+int sem_timedwait(sem_t *sem, const struct timespec *abs_timeout);
+
+编写代码实现生产者和消费者的例子
+数据结构 环状队列
+信号量   限定生产个数
+
+二 进程间通讯   system v ipc
+共享内存
+查看系统中的system v ipc 对象
+1  申请一个system v ipc的键值
+ftok(3)
+#include <sys/types.h>
+#include <sys/ipc.h>
+key_t ftok(const char *pathname, int proj_id);
+功能：生产一个system  v ipc的键值
+参数：
+pathname:指定一个有效的文件名
+proj_id:指定一个整数。取这个整数的低有效8bit。 1 257
+返回值：
+成功   返回键值
+失败  -1  errno被设置
+
+2  使用shmget(2)获取共享内存的id
+跟key相关的共享内存已经存在，返回共享内存的id。
+跟key相关的共享内存不存在，创建共享内存，返回id。
+  
+#include <sys/ipc.h>
+#include <sys/shm.h>
+int shmget(key_t key, size_t size, int shmflg);
+功能：分配一个共享内存段，返回共享内存段的id
+参数：
+key:ftok(3)获取的键值
+size:指定了共享内存段的尺寸。
+shmflg:
+IPC_CREAT 
+IPC_EXCL
+mode   指定授予共享内存段的权限。
+返回值：
+成功   返回一个有效的共享内存段的id
+失败  -1  errno被设置
+
+shmat(2)  shmdt(2)
+ 
+void *shmat(int shmid, const void *shmaddr, int shmflg);
+功能：
+参数：
+shmid:  指定了共享内段的id。
+shmaddr:NULL   有系统选择合适的地址附加共享内存段
+shmflg:0
+返回值：
+(void *) -1   错误  errno被设置
+成功  返回附加到进程的地址。进程的虚拟地址。
+
+int shmdt(const void *shmaddr);
+功能：分离共享内存段。将shmaddr指定的共享内存段从当前的地址空间里分离出去
+参数：
+shmaddr:指定了共享内存段的地址。进程的虚拟地址。
+返回值：
+成功  0
+错误  -1   errno被设置
+
+
+
+
+
