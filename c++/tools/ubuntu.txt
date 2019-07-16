@@ -1,0 +1,7 @@
+ubuntu 需要安装xchm
+1）联网在线安装
+sudo apt-get install xchm
+----------------------------
+2）离线安装
+cd chm
+sudo dpkg -i *
