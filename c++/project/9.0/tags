@@ -1,0 +1,87 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+CTO	CTO.cpp	/^CTO::CTO(const string & filename){$/;"	f	class:CTO
+CTO	CTO.cpp	/^CTO::CTO(const string& name,double salary,double allow,double bonus):$/;"	f	class:CTO
+CTO	CTO.cpp	/^CTO::CTO(void){}$/;"	f	class:CTO
+CTO	CTO.h	/^class CTO:public Technician,public Manager{$/;"	c
+Company	Company.cpp	/^Company::Company(void){$/;"	f	class:Company
+Company	Company.h	/^class Company{\/\/企业类$/;"	c
+Employee	Employee.cpp	/^Employee::Employee(const Employee& that){}$/;"	f	class:Employee
+Employee	Employee.cpp	/^Employee::Employee(const string& filename){$/;"	f	class:Employee
+Employee	Employee.cpp	/^Employee::Employee(const string& name,double salary,LEVEL level):$/;"	f	class:Employee
+Employee	Employee.cpp	/^Employee::Employee(void){}$/;"	f	class:Employee
+Employee	Employee.h	/^class Employee{$/;"	c
+L1	Employee.h	/^    enum LEVEL{L1=101,L2=201,L3=301,L4=401};$/;"	e	enum:Employee::LEVEL
+L2	Employee.h	/^    enum LEVEL{L1=101,L2=201,L3=301,L4=401};$/;"	e	enum:Employee::LEVEL
+L3	Employee.h	/^    enum LEVEL{L1=101,L2=201,L3=301,L4=401};$/;"	e	enum:Employee::LEVEL
+L4	Employee.h	/^    enum LEVEL{L1=101,L2=201,L3=301,L4=401};$/;"	e	enum:Employee::LEVEL
+LEVEL	Employee.h	/^    enum LEVEL{L1=101,L2=201,L3=301,L4=401};$/;"	g	class:Employee
+Manager	Manager.cpp	/^Manager::Manager(const string& filename){$/;"	f	class:Manager
+Manager	Manager.cpp	/^Manager::Manager(const string& name,double salary,double bonus)$/;"	f	class:Manager
+Manager	Manager.cpp	/^Manager::Manager(void){}$/;"	f	class:Manager
+Manager	Manager.h	/^class Manager:virtual public Employee{$/;"	c
+Technician	Technician.cpp	/^Technician::Technician(const string& filename){$/;"	f	class:Technician
+Technician	Technician.cpp	/^Technician::Technician(const string& name,double salary,double allow)$/;"	f	class:Technician
+Technician	Technician.cpp	/^Technician::Technician(void){}$/;"	f	class:Technician
+Technician	Technician.h	/^class Technician:virtual public Employee{$/;"	c
+__COMPANY_H_	Company.h	2;"	d
+__CTO_H_	CTO.h	2;"	d
+__EMPLOYEE_H_	Employee.h	2;"	d
+__MANAGER_H_	Manager.h	2;"	d
+__TECHNICION_H_	Technician.h	2;"	d
+addEmployee	Company.cpp	/^void Company::addEmployee(void){$/;"	f	class:Company
+calBasic	Employee.cpp	/^double Employee::calBasic(void){$/;"	f	class:Employee
+calMerit	CTO.cpp	/^double CTO::calMerit(void){$/;"	f	class:CTO
+calMerit	Employee.cpp	/^double Employee::calMerit(void){$/;"	f	class:Employee
+calMerit	Manager.cpp	/^double Manager::calMerit(void){$/;"	f	class:Manager
+calMerit	Technician.cpp	/^double Technician::calMerit(void){$/;"	f	class:Technician
+calSalary	Employee.cpp	/^void Employee::calSalary(void){$/;"	f	class:Employee
+company	Company.cpp	/^Company Company::company;$/;"	m	class:Company	file:
+company	Company.h	/^    static Company company;$/;"	m	class:Company
+deleteEmployee	Company.cpp	/^void Company::deleteEmployee(void){$/;"	f	class:Company
+empVector	Company.h	/^    vector<Employee*> empVector;$/;"	m	class:Company
+file	Employee.h	/^    FILE* file;\/\/保存员工信息指针$/;"	m	class:Employee
+getCompany	Company.cpp	/^Company& Company::getCompany(void){$/;"	f	class:Company
+getEmployeeCount	Employee.cpp	/^const int& Employee::getEmployeeCount(void){$/;"	f	class:Employee
+loadInfo	Company.cpp	/^Employee* Company::loadInfo(const string& filename){$/;"	f	class:Company
+m_allow	Technician.h	/^    double m_allow;\/\/研发津贴$/;"	m	class:Technician
+m_attend	Employee.h	/^    double m_attend;\/\/出勤率$/;"	m	class:Employee
+m_bonus	Manager.h	/^    double m_bonus;\/\/绩效奖金$/;"	m	class:Manager
+m_count	Employee.cpp	/^int Employee::m_count = 0;$/;"	m	class:Employee	file:
+m_count	Employee.h	/^    static int m_count;\/\/记录员工人数$/;"	m	class:Employee
+m_id	Employee.h	/^    int m_id;\/\/工号$/;"	m	class:Employee
+m_level	Employee.h	/^    LEVEL m_level;$/;"	m	class:Employee
+m_name	Employee.h	/^    string m_name;\/\/姓名$/;"	m	class:Employee
+m_salary	Employee.h	/^    double m_salary;\/\/工资$/;"	m	class:Employee
+main	main.cpp	/^int main()$/;"	f
+operator !=	Employee.cpp	/^bool Employee::operator!=(int id)const{$/;"	f	class:Employee
+operator <<	Employee.cpp	/^ostream& operator<<(ostream& os,const Employee& emp){$/;"	f
+operator =	Employee.cpp	/^Employee& Employee::operator=(const Employee& that){}$/;"	f	class:Employee
+operator ==	Employee.cpp	/^bool Employee::operator==(int id)const{$/;"	f	class:Employee
+paySalary	Company.cpp	/^void Company::paySalary(void){$/;"	f	class:Company
+printBasic	Employee.cpp	/^void Employee::printBasic(void)const{$/;"	f	class:Employee
+printExtra	CTO.cpp	/^void CTO::printExtra(void)const{$/;"	f	class:CTO
+printExtra	Employee.cpp	/^void Employee::printExtra(void)const{$/;"	f	class:Employee
+printExtra	Manager.cpp	/^void Manager::printExtra(void)const{$/;"	f	class:Manager
+printExtra	Technician.cpp	/^void Technician::printExtra(void)const{$/;"	f	class:Technician
+printInfo	Employee.cpp	/^void Employee::printInfo(void)const{$/;"	f	class:Employee
+printMenu	Company.cpp	/^void Company::printMenu(void){$/;"	f	class:Company
+queryAll	Company.cpp	/^void Company::queryAll(void){$/;"	f	class:Company
+queryEmployee	Company.cpp	/^void Company::queryEmployee(void){$/;"	f	class:Company
+queryOne	Company.cpp	/^void Company::queryOne(void){$/;"	f	class:Company
+run	Company.cpp	/^void Company::run(void){$/;"	f	class:Company
+saveInfo	Employee.cpp	/^void Employee::saveInfo(void){$/;"	f	class:Employee
+setId	Employee.cpp	/^void Employee::setId(int id){$/;"	f	class:Employee
+setName	Employee.cpp	/^void Employee::setName(const string& name){$/;"	f	class:Employee
+setSalary	Employee.cpp	/^void Employee::setSalary(double salary){$/;"	f	class:Employee
+size	Company.cpp	/^size_t Company::size(void)const{$/;"	f	class:Company
+updateEmployee	Company.cpp	/^void Company::updateEmployee(void){$/;"	f	class:Company
+~CTO	CTO.cpp	/^CTO::~CTO(void){}$/;"	f	class:CTO
+~Company	Company.cpp	/^Company::~Company(void){}$/;"	f	class:Company
+~Employee	Employee.cpp	/^Employee::~Employee(void){$/;"	f	class:Employee
+~Manager	Manager.cpp	/^Manager::~Manager(void){}$/;"	f	class:Manager
+~Technician	Technician.cpp	/^Technician::~Technician(void){}$/;"	f	class:Technician
