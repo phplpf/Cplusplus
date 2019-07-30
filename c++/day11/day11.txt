@@ -1,0 +1,115 @@
+今天：
+二十三 运行时类型信息 //了解
+1 typeid操作符
+  #include <typeinfo>
+  typeid(类型/对象),返回typeinfo对象用于描述类型信息
+  注：typeinfo类中包含name成员函数，可以获取字符串形式的类型信息。
+  注：typeinfo类中支持“==”“!=”操作符,通过它们可以直接进行类型之间的比较，如果类型之间具有多态的继承关系，typeid还可以利用多态语法确定实际的目标对象类型.
+  
+2 dynamic_cast操作符
+语法:
+	目标变量 = dynamic_cast<目标类型>(源类型变量);
+适用场景：
+	主要用于具有多态继承关系，指针或引用的显式转换
+	注：在转换过程中，会检查目标变量类型和期望转换的类型是否一致，如果一致则转换成功，如果不一致则失败，如果转换指针返回NULL表示失败，如果转换是引用，抛出异常“bad_cast”表示失败。
+	
+二十四 C++异常机制
+1 软件开发中常见错误
+1）语法错误
+2）逻辑错误
+3）功能错误
+4）设计缺陷
+5）需求不符
+6）环境异常
+7）操作不当
+
+2 传统C中的错误处理机制
+1）通过返回值表示错误
+优点：函数调用路径中所有的栈对象都可以得到正确析构，不会内存泄漏。
+缺点：错误处理流程比较麻烦，需要对函数调用路径逐层进行返回值判断，代码臃肿。
+
+2）通过远程跳转处理错误
+优点：不需要进行逐层返回值判断，实现一步到位错误处理，代码精炼。
+缺点：函数调用路径中的栈对象失去被析构机会，有内存泄漏的风险。
+
+3 C++异常语法
+1）异常抛出
+   throw 异常对象;
+   注：异常对象可以基本类型，也可以是类类型
+2）异常检测和捕获
+	try{
+		//可能引发异常语句
+	}
+	catch(异常类型1){
+		针对异常类型1的处理
+	}
+	catch(异常类型2){
+		针对异常类型2的处理
+	}
+	...
+   注：catch子句根据异常对象类型自上而下顺序匹配，而非最优匹配。因此对子类类型异常捕获语句要写在前面，不能写在对基类类型异常捕获语句后面，否则将会被基类类型的异常捕获语句提前截获。
+   
+4 函数的异常说明
+1)用于说明函数可能抛出的异常类型
+  返回类型 函数名(形参表) throw(异常类型表) {函数体}
+2)函数的异常说明是一种承诺，表示该函数所抛出的异常不会超出说明的范围，如果函数的实现者抛出了异常说明以外的类型，是无法被函数调用者正常捕获，而会被系统捕获，导致进程终止。
+3)两种极端形式
+--》不写异常说明，表示可以抛出任何异常
+--》空异常说明,"throw()"表示不会抛出任何异常
+4)如果函数的声明和定义分开写时，要保证异常说明类型一致，但是顺序无所谓.
+//补充虚函数覆盖条件：
+5)如果基类中的虚函数带有异常说明，那么该函数在子类中的覆盖版本不能说明比基类版本抛出更多的异常，否则将会因为"放松throw限定"导致编译失败.
+
+5 标准异常类：exception
+ class exception{//标准C++库
+ public:
+    exception() throw() {} 
+    virtual ~exception() throw() ;
+
+    /*Returns a C-style character string describing 
+      the general cause of the current error.  */
+    virtual const char* what() const throw();
+ };
+
+6 构造和析构函数的异常//了解
+1）构造函数可以抛出异常，但是对象将被不完整创建，这样对象的析构不再会自动被执行，因此在构造函数抛出异常之前，需要手动释放之前分配的动态资源.
+2）析构函数最好不要抛出异常
+
+
+二十五 I/O流 //了解
+1 主要的I/O流类
+							ios
+					/					\
+				istream				ostream
+		/		 |			\    /      |		\
+istrstream ifstream iostream	ofstream  ostrstream
+
+2 格式化I/O
+1）格式化函数(成员函数)
+	cout << 20/3.0 << endl;//6.66666
+   cout.precision(10);
+   cout << 20/3.0 << endl;//6.666666666
+
+2）流控制符(全局函数)
+	cout << 20/3.0 << endl;//6.66666
+   cout << setprecision(10) << 20/3.0 <<
+   	 endl;//6.666666666
+ 
+3 字符串I/O
+#include <strstream>//过时，不要使用
+istrstream/ostrstream
+
+#include <sstream>//推荐
+istringstream //类似sscanf()
+ostringstream //类似sprintf()
+
+4 文件I/O
+#include <fstream>
+ifstream //类似fscanf();
+ofstream //类似fprintf();
+
+5 二进制I/O
+//类似fread
+istream& istream::read(char* buf,streamsize num);
+//类似fwrite
+ostream& ostream::write(const char* buf,size_t num);
