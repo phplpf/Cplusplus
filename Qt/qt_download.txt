@@ -1,0 +1,42 @@
+下载地址：
+http://download.qt.io/archive/qt/ 
+ubuntu 32位下载：qt-opensource-linux-x86-5.4.1.run 
+ubuntu 64位下载：qt-opensource-linux-x64-5.4.1.run 
+
+ubuntu18.04以上建议下载Qt的较新版本：
+qt-opensource-linux-x64-5.11.2.run
+
+安装方法： 
+//添加可执行权限
+chmod +x qt-opensource-linux-x64-5.x.x.run 
+
+//运行安装包，根据提示安装，默认安装在主目录下
+./qt-opensource-linux-x64-5.x.x.run
+
+----------------------
+Qt5.4安装过程（32位ubuntu 16.04）:
+1）下载qt安装包
+   qt-opensourse-linux-x64-5.4.1.run
+2）运行安装程序
+	./qt-opensourse-linux-x64-5.4.1.run
+	注：根据提示，默认安装在主目录下
+3）环境变量配置(PATH)
+思路：将Qt相关的可执行程序所在路径添加到PATH中
+	/home/tarena/Qt5.4.1/5.4/gcc_64/bin
+	/home/tarena/Qt5.4.1/Tools/QtCreator/bin
+
+	sudo vi /etc/environment
+	PATH="/home/tarena/Qt5.4.1/Tools/QtCreator/bin:/home/tarena/Qt5.4.1/5.4/gcc_64/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games"
+	
+4）重启系统测试
+  执行“qmake -v”正常看到Qt的版本信息
+  执行“qtcreator”正常可以进入Qt的集成开发环境界面
+  
+问题：提示缺少libgstreamer...相关库
+解决：在线安装
+sudo apt-get install libgstreamer0.10-0
+sudo apt-get install libgstreamer-plugins-base0.10-0
+
+问题：编译Qt程序时提示缺少libgl...相关库(没有安装openGL)
+解决：在线安装
+sudo apt-get install libgl1-mesa-dev

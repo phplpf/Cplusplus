@@ -1,0 +1,126 @@
+Qt(跨平台的C++ GUI应用程序开发框架)
+时间：6 days
+----------------------------
+一 Qt的概述
+1 Qt发展历史
+1）1991年Haavard Nord和Eirik Chambe-Eng合作编写最初的Qt.
+2）1994年Haavard和Eirik创建了TrollTech(奇趣科技)
+3）2005年Qt4.0发布
+4）2008年奇趣科技被诺基亚收购
+5）2009年将Qt源代码开放
+6）2012年将Qt全部业务和知识产权出售给Digia公司
+7）2013年成立子公司The Qt Company
+	https://www.qt.io
+	
+2 Qt主要的工具软件
+1）assistant(Qt助手)
+   执行"assistant"即可进入Qt帮助手册界面，里面包含Qt类库的详细说明文档.
+2）qmake(qt构建器)
+   qmake -v //查看Qt版本信息
+   qmake -project//构建工程，得到“xx.pro”
+   qmake //根据“xx.pro”生成Makefile
+3）designer(Qt设计师)
+   图形界面编辑器，用于实现界面设计，执行“designer”即可进入设计师界面。
+4）uic(Qt界面转换器)
+   实现将设计师得到的.ui文件转换为C++文件
+   uic xx.ui -o ui_xx.h
+5）rcc(Qt资源编译器)
+	将资源文件(图片)转换为C++源文件
+6）moc(元对象编译器)
+	将Qt中语法扩展的内容转换为标准C++代码
+7）qtcreator(Qt创造器)
+	Qt的集成开发环境(IDE),包含所有相关工具
+	
+3 Qt帮助手册使用:assistant
+eg:QApplication
+1）先看第一句话，了解该类的功能，如果看不懂可以点“more”链接，查看该类的详细说明.
+2）接着往下看，了解头文件，构建选项(QT+=widgets)和继承关系。
+3）Properties(成员变量)
+4）Public Functions(公有成员函数)
+5）Reimplemented Public Functions(公有虚函数)
+6）Public Slots(槽函数)//Qt语法扩展
+7）Signals(信号函数)//Qt语法扩展
+8）Static Public Members(静态公有成员)
+9）Reimplemented Protected Functions(保护虚函数)
+10）Detailed Description(详细描述)
+
+练习：查看QLabel类帮助手册
+
+二 第一个Qt程序
+1 创建工程目录
+  mkdir Hello
+  注：每个Qt程序都要放在独立的目录下
+2 进入工程目录，编写源代码(cpp)
+  vi main.cpp
+3 执行“qmake -project”构建工程,生成Hello.pro工程文件
+  vi Hello.pro
+  QT += widgets//指定需要使用widget模板，将来会自动链接该模块相关的头文件和库文件。
+4 执行“qmake”,根据工程文件生成Makefile
+5 执行“make”，完成编译和链接
+  注：如果有语法错误，修改以后再次执行“make”即可，前面3、4两步不要重复执行
+6 测试运行
+  执行"./Hello",正常看到一个标签窗口  
+  
+练习：创建QT应用程序，里面包含一个按钮(QPushButton),按钮显示文本“Button”.  
+
+三 Qt字符串(QString)和字符编码
+1 常见编码
+1）linux中默认中：utf-8
+2）window中默认使用：GBK
+3）Qt内部编码unicode(utf-16)
+
+2 编码转换类：QTextCodec
+//1)创建GBK编码对象
+QTextCodec *codec=QTextCodec::codecForName("GBK");
+//2)将GBK编码字符串转换为unicode编码
+QString string=codec->toUnicode("GBK编码字符串");
+
+练习：创建Qt应用程序，里面包含一个标签和一个按钮，标签显示文本“我是标签”，按钮显示文本“我是按钮”
+1）正常构建，6步，正确显示
+2）通过vi底行命令，将编码修改为gbk，再次make结果乱码
+   :set fileencoding=GBK
+3）使用QTextcodec实现编码转换，再次make，结果又可以正确显示。
+
+四 父窗口(容器窗口)
+1 在创建控件可以指定停靠在某个父窗口上面，通过父窗口可以管理整个界面；而如果创建控件时没有将会飘在外面形成独立的窗体.
+
+2 常用的父窗口类
+1）QWidget//控件基类
+2）QMainWindow//主窗口
+3）QDialog//对话框
+
+3 QWidget类中两个常用函数
+1）调整位置
+	void move(int x,int y);
+2）调整大小
+	void resize(int w,int h);
+	
+注：使用new操作符创建Qt的对象时，如果指定了父窗口，也可以不写delete，因为在父窗口对象销毁时，上面停靠的对象会自动被delete.
+
+五 信号和槽//重点掌握
+1 概念
+	信号和槽本质都是Qt中的成员函数，主要用于不同对象之间的数据交互，当某个对象状态发生改变时，将会发送信号，该信号可以被其它对象接收，接收信号的对象将会执行一个指定的成员函数(槽).
+	
+2 定义
+  class XX:public QObject{
+  		Q_OBJECT //moc
+  signals:
+  		void sigFun(...);//信号
+  public slots:
+  		void slotFun(...){...}//槽
+  };
+  注：只有QObject子类才可以定义信号或槽	
+  注：信号函数只需声明，不能写定义	 
+  注：槽函数可以连接到某个信号上，通过信号可以触发槽函数的执行，另外槽函数也可以当做普通成员函数直接调用
+
+3 信号和槽连接
+QObject::connect(
+	const QObject * sender, //信号发送对象
+	const char * signal, //信号函数
+	const QObject * receiver, //信号接收对象
+	const char * method) //槽函数
+  
+  SIGNAL(信号函数);//将信号函数转换为const char*
+  SLOT(槽函数);//将槽函数转换为const char*
+  
+  案例：创建QT应用程序，里面包含一个标签和一个按钮，实现点击按钮关闭标签。

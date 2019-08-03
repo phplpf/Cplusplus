@@ -1,0 +1,214 @@
+回顾：
+1 Qt概述
+1）qt版本，Qt5.x.x、Qt4.x.x
+2）qt工具，assistant、qmake
+
+2 第一个Qt程序
+1）创建工程目录
+2）编写(cpp)
+3）qmake -project//.pro 
+4）qmake //Makefile
+5）make
+6）测试运行
+
+3 Qt字符串(QString)和字符编码
+  QTextCodec* codec=QTextCodec::codecForName("GBK");
+  QString str=codec->toUnicode("GBK编码字符串");
+  
+4 父窗口
+1）常用父窗口类：QWidget、QMainWindow、QDialog
+2）QWidget中两个常用函数：move(),resize()
+
+---------------
+今天：
+一 信号和槽//重点掌握
+1 概念
+	信号和槽本质都是Qt中的成员函数，主要用于不同对象之间的数据交互，当某个对象状态发生改变时，将会发送信号，该信号可以被其它对象接收，接收信号的对象将会执行一个指定的成员函数(槽).
+	
+2 定义
+  class XX:public QObject{
+  		Q_OBJECT //moc
+  signals:
+  		void sigFun(...);//信号
+  public slots:
+  		void slotFun(...){...}//槽
+  };
+  注：只有QObject子类才可以定义信号或槽	
+  注：信号函数只需声明，不能写定义	 
+  注：槽函数可以连接到某个信号上，通过信号可以触发槽函数的执行，另外槽函数也可以当做普通成员函数直接调用
+
+3 信号和槽连接
+QObject::connect(
+	const QObject * sender, //信号发送对象
+	const char * signal, //信号函数
+	const QObject * receiver, //信号接收对象
+	const char * method) //槽函数
+  
+  SIGNAL(信号函数);//将信号函数转换为const char*
+  SLOT(槽函数);//将槽函数转换为const char*
+  
+4 信号和槽连接语法要求
+1）信号和槽参数要一致
+	QObject::connect(A,SIGNAL(sigfunc(int)),
+						  B,SLOT(slotfunc(int)));//ok
+	QObject::connect(A,SIGNAL(sigfunc(void)),
+						  B,SLOT(slotfunc(int)));//error
+2）可以带有缺省参数
+	QObject::connect(A,SIGNAL(sigfunc(void)),
+						  B,SLOT(slotfunc(int=0)));//ok
+3）信号函数可以比槽函数参数多，多余将被忽略
+	QObject::connect(A,SIGNAL(sigfunc(int,int)),
+						  B,SLOT(slotfunc(int)));//ok	
+4）一个信号可以被连接到多个槽函数(一对多)
+	QObject::connect(A,SIGNAL(sigfunc(int)),
+						  B1,SLOT(slotfunc1(int)));			QObject::connect(A,SIGNAL(sigfunc(int)),
+						  B2,SLOT(slotfunc2(int)));	
+	注：当A发送信号时，B1和B2的槽函数都将被执行，但是执行顺序不确定
+5）多个信号可以连接到同一个槽函数(多对一)
+	QObject::connect(A1,SIGNAL(sigfunc1(int)),
+						  B,SLOT(slotfunc(int)));
+	QObject::connect(A2,SIGNAL(sigfunc2(int)),
+						  B,SLOT(slotfunc(int)));
+	注：无论是A1还是A2发射信号，B的槽函数都会被执行
+6）两个信号函数可以直接连接//了解
+	QObject::connect(A1,SIGNAL(sigfunc1(int)),
+						  A2,SIGNAL(sigfunc2(int)));
+	注：当A1发送信号后，触发A2的信号也发送				  
+
+案例：事件同步，实现滑块控件和选值框控件同步运行
+1）滑块类：QSlider
+  //构造函数
+  QSlider(水平/垂直,父窗口指针);
+  //设置滑块滑动范围
+  setRange(int min, int max);
+  //滑块滑动时发送信号
+  valueChanged(int value)[signal]
+  //设置滑块位置的槽函数	
+  setValue(int)[slot]
+2）选值框：QSpinBox
+  //构造函数
+  QSpinBox(父窗口指针);
+  //设置选值框数值改变范围
+  setRange(int min, int max);
+  //选值框数值改变时发送信号
+  valueChanged(int value)[signal]
+  //设置选值框当前数值的槽函数	
+  setValue(int)[slot]
+  
+  
+二 面向对象的Qt编程
+案例：加法计算器
+思路：
+	class CalculatorDialog:public QDialog{
+		Q_OBJECT //moc,处理自定义槽函数语法扩展
+	public:
+		构造函数(){
+			//界面初始化
+		}
+	public slots://自定义槽函数
+		void 检查并恢复按钮正常状态的槽函数(){
+			...
+		}
+		void 计算和显示结果的槽函数(){
+			...
+		}
+	private:
+		QLineEdit\QLabel\QPushButton;
+	};
+	int main(int argc,char** argv){
+		QApplication app(argc,argv);
+		CalculatorDialog calc;
+		calc.show();
+		return app.exec();
+	}
+	QT中相关类：
+		QDialog//父窗口
+		QLineEdit//行编辑控件
+		QLabel//标签
+		QPushButton//按钮
+		QDoubleValidator//数字验证器
+		QHBoxLayout//水平布局器,自动调整控件大小和位置
+		
+三 Qt设计师使用(designer)	
+案例：使用Qt设计师，重构加法计算器程序
+1 创建工程目录
+   mkdir Calculator2
+2 进入工程目录
+1）执行“designer”进入设计师界面，完成界面设计
+2）在新建窗体界面，选择父窗口"Dialog without Button"
+
+3 在设计师环境中完成界面设计
+1）将要使用的控件从“widget Box”找到并拖拽到父窗口中
+   LineEdit、Label、PushButton
+2）设置父窗口和每个控件属性
+--》父窗口
+    objectName(对象名):CalculatorDialog
+    注：将来会根据父窗口的对象名生成同名的类，和界面相关的代码都会放在该类中.
+    font(字体)：点大小(20)
+    windowTitle：计算器
+--》左操作数
+	 objectName：m_editX
+	 alignment:水平(AlignRight)   
+--》右操作数
+	 objectName：m_editY
+	 alignment:水平(AlignRight)
+--》显示结果
+	 objectName：m_editZ
+	 alignment:水平(AlignRight)
+	 readOnly：勾选√
+--》加号
+	 objectName：m_label
+	 text:"+"
+--》等号
+	 objectName：m_button
+	 text:"="
+	 enabled：去掉勾选√（禁用）
+3）调整大小和位置
+--》方法1：使用鼠标
+--》方法2：键盘按键，“ctrl/shift+方向键”
+--》方法3：设置geometry，位置(x,y) 大小(宽度)
+--》方法4：使用布局器//推荐
+
+4）窗体--》预览
+5）保存(ctrl+s),指定文件名：CalculatorDialog.ui
+6）关闭，最终得到“CalculatorDialog.ui”文件
+
+4 将".ui"转换为C++的源文件".h"
+  uic CalculatorDialog.ui -o ui_CalculatorDialog.h
+  
+"ui_CalculatorDialog.h"内容：
+  class Ui_CalculatorDialog{
+  public:
+  		图形控件声明;
+  		void setupUi(){
+  			//界面初始化
+  		}
+  };
+  namespace Ui{
+  	class CalculatorDialog
+  		:public Ui_CalculatorDialog{};
+  }
+  Ui::CalculatorDialog<=等价=>Ui_CalculatorDialog
+
+使用“ui_CalculatorDialog.h”方法：
+  方法1：继承
+  class MyClass:public Ui::CalculatorDialog{
+  		//将和界面相关代码继承过来直接使用
+  };
+  方法2：组合
+  class MyClass{
+  public:
+  		MyClass(void):ui(new Ui::CalculatorDialog)
+  private:
+  		//通过"ui->"访问和界面相关代码
+  		Ui::CalculatorDialog* ui;
+  };
+  
+5 编码、构建、测试...
+
+
+练习：使用设计师，设计获取系统时间的窗口，实现点击获取时间按钮，获取当前系统时间并显示。
+参考：time.png
+提示：获取时间方法
+	QTime time = QTime::currentTime();
+	QString str = time.toString("hh:mm:ss");

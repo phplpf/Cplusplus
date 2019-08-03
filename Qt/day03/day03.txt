@@ -1,0 +1,135 @@
+回顾：
+1 信号和槽连接
+1）参数要一致
+2）可以有缺省值
+3）信号函数参数可以多于槽函数
+4）一对多
+5）多对一
+6）两个信号函数可以直接连接
+
+2 面向对象Qt编程
+
+3 Qt设计师
+  xx.ui(xml)--uic-->ui_xx.h(c++)
+-----------------------------------
+案例：获取系统时间
+界面设计：
+	m_label：
+		frameShape:Panel
+		frameShadow:Sunken
+		alignment:水平(AlignHCenter)
+------------------------------------
+案例：登录对话框
+1）创建工程目录：Login
+2）进入工程目录，启动设计师，完成界面设计
+--》父窗口
+    objectName:LoginDialog
+    font:点大小(20)
+    windowTitle:登录
+--》用户名输入控件
+	 objectName：m_editUsername
+--》密码输入控件
+	 objectName：m_editPassword
+	 echoMode：password
+--》确定/取消的按钮框
+	 objectName：m_btnBox
+	 layoutDirction:RightToLeft
+--》布局调整大小位置
+--》保存(LoginDialog.ui)	
+
+-----------------------------------------
+一 Qt创造器使用(qtcreator)
+案例：使用qtcreator再次重构加法计算器案例
+1 任意目录下执行“qtcreator”进入Qt创造器界面
+2 在欢迎模式，点击“new Project”创建工程
+1）选择模板
+   Application->Qt Widgets Application
+2）项目位置和介绍
+	名称：Calculator3
+	位置：/home/tarena/c++1905/qt/day03
+	注：将来会在指定位置创建和工程名字一致的工程目录
+3）kit Selection(默认)
+4）类信息
+	选择基类(父窗口)：QDialog
+	指定类名：CalculatorDialog
+	注：将来会根据类名，自动生成对应的文件
+		CalculatorDialog.h
+		CalculatorDialog.cpp
+		CalculatorDialog.ui
+5）项目管理(忽略)	
+6）完成，将自动切换编辑模式
+
+3 双击“CalculatorDialog.ui”，进入设计模式(designer),完成界面设计：
+1）将要使用的控件从“widget Box”找到并拖拽到父窗口中
+   LineEdit、Label、PushButton
+2）设置父窗口和每个控件属性
+--》父窗口
+    objectName(对象名):默认不要修改！！！
+    font(字体)：点大小(20)
+    windowTitle：计算器
+--》左操作数
+	 objectName：m_editX
+	 alignment:水平(AlignRight)   
+--》右操作数
+	 objectName：m_editY
+	 alignment:水平(AlignRight)
+--》显示结果
+	 objectName：m_editZ
+	 alignment:水平(AlignRight)
+	 readOnly：勾选√
+--》加号
+	 objectName：m_label
+	 text:"+"
+--》等号
+	 objectName：m_button
+	 text:"="
+	 enabled：去掉勾选√（禁用）
+3）调整大小和位置
+--》方法1：使用鼠标
+--》方法2：键盘按键，“ctrl/shift+方向键”
+--》方法3：设置geometry，位置(x,y) 大小(宽度)
+--》方法4：使用布局器//推荐
+4）运行(ctrl+R)-->预览
+5）保存(ctrl+s)
+
+二 资源和图像
+1 资源编译器(rcc)
+1）创建资源文件(.qrc)//xml
+vi test.qrc
+<RCC>
+    <qresource prefix="/">
+        <file>6.jpg</file>
+    </qresource>
+</RCC>
+2）使用rcc转换C++源文件
+rcc test.qrc -o qrc_test.cpp
+
+2 绘图事件
+1）程序开始运行或者窗口发生改变将会触发，也可以通过调用update()/repaint()也可以触发执行.
+2）绘图事件处理函数(虚函数)
+	virtual void QWidget::paintEvent(QPaintEvent*);
+注：绘图事件处理函数是虚函数，如果希望在自定义窗口中绘制指定图像，可以通过重写paintEvent，在其中通过“画家类”实现图像绘制。
+
+3 画家类QPainter//Qt二维图形引擎
+  QPainter painter(this);
+  painter.drawImage(QRect,QImage);
+  QRect:绘图所在矩形区域
+  QImage:要绘制的图像
+
+案例：图图秀
+1）工程名：ShowImage
+2）类信息：ShowImageDialog
+3）界面设计
+--》Frame(显示框架)
+	objectName:m_frame
+	sizePolicy:垂直策略(Expanding)
+	frameShape:Box
+--》m_btnNext(下一张按钮)
+--》m_btnPrev(上一张按钮)
+4）向工程添加资源图片
+--》将“images”目录拷贝到工程下
+--》添加新文件：Qt->Qt Resource File(资源文件)
+--》指定名字：showImage
+--》完成，自动创建showiamge.qrc资源文件，并进入资源编辑界面
+--》添加->添加前缀“/new/prefix1”
+--》添加->添加文件：选择images目录10个图片并打开
