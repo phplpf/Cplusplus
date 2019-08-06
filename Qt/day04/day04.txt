@@ -1,0 +1,194 @@
+回顾：
+1 Qt设计师(designer)
+2 Qt创造器(qtcreator)
+3 资源和图像
+  xx.qrc(xml)--rcc--qrc_xx.cpp
+  paintEvent()/QPainter
+---------------------
+今天：
+一 目录和定时器
+1 目录(QDir)
+1)创建目录对象
+  QDir dir("/home/tarena/c++1905/qt/photos");//绝对路径
+  QDir dir("./photos");//相对路径(推荐)
+  
+2）遍历目录的内容
+  QStringList entryList(Filters filters);
+  filters:过滤器，指定要访问的内容
+  		QDir::Dirs //子目录
+  		QDir::Files //普通文件
+  		QDir::NoDotAndDotDot//不包括"."".."
+  		
+eg:遍历访问“./photos”目录所有的普通文件
+	QDir dir("./photos");
+	QStringList list=dir.entryList(QDir::Files);
+	for(int i=0;i<list.size();i++){
+		qDebug() << list.at(i);
+	}
+	
+2 定时器
+1）定时器事件
+	//定时器事件处理函数，定时器到时后将被触发执行
+	virtual void timerEvent(QTimerEvent*);
+	//开始定时器
+	int startTimer(int interval);
+	注：指定定时器间隔时间(毫秒)，返回定时器ID
+	//关闭定时器,参数为定时器ID
+	void killTimer(int id);
+
+2）定时器类(QTimer)
+	QTimer timer;//创建定时器对象
+	//开启定时器，每隔msec毫秒发送信号timeout
+	timer.start(int msec);
+	//通过自定义槽函数处理定时器
+	connect(&timer,SIGNAL(timeout()),
+		this,SLOT(mySlot()));
+	//关闭定时器
+	timer.stop();
+	
+ 案例：摇奖机
+ 1）工程名：Lottery
+ 2）类名：LotteryDialog
+ 3）界面设计
+ --》父窗口：
+ 	font：点大小(20)
+	windowTitle:摇摇乐
+ --》frame
+ 	objectName:m_frame
+ 	sizePolicy:垂直策略(expanding)
+ 	frameShape:box
+ --》pushButton
+ 	objectName:m_button
+ 	text:"开始"
+ 	
+ 注：在项目模式中，取消“Shadow Build”，然后将photos目录拷贝到工程目录下.
+ 
+二 鼠标和键盘
+1 鼠标事件 
+  #include <QMouseEvent>
+  virtual void mousePressEvent(QMouseEvent*)//按下
+  virtual void mouseReleaseEvent(QMouseEvent*)//抬起
+  virtual void mouseMoveEvent(QMouseEvent*)//移动
+  //双击
+  virtual void mouseDoubleClickEvent(QMouseEvent*)
+  
+  ----------------------------------------
+  QPoint(int x,int y) //位置
+  QSize(int w,int h) //大小
+  QRect(int x,int y,int w,int h)//矩形区域
+  -----------------------------------------
+  
+  案例：使用鼠标左键拖拽label移动
+  工程名：Mouse
+  类名：MouseDialog
+  界面设计(label)：
+  -->frameShape:Box
+  -->frameShadow:Raised
+  
+  修改label背景颜色：
+  方法1：调色板
+  		--》autoFillBackground:勾选√
+  		--》palette：点击“继承”->改变调整板->选择颜色
+  方法2：样式表
+  		--》styleSheet
+  		--》编辑样式表
+  		--》添加颜色
+  		--》background-color（选择颜色）
+  		
+2 键盘事件 	
+#include <QKeyEvent>
+virtual void keyPressEvent(QKeyEvent*)//按键按下
+virtual void keyReleaseEvent(QKeyEvent*)//按键抬起 
+
+案例：使用键盘方向键控制label移动
+工程名：Keyboard
+类名：KeyboardDialog 	
+  
+三 Qt多线程(QThread)
+1 创建线程方法1：moveToThread
+  class Worker:public QObject{
+  		Q_OBJECT
+  public slots:
+  		void dowork(void){
+  			//耗时或阻塞代码，需要放在子线程中执行
+  		}
+  };	
+  //创建子线程对象
+  QThread workerThread;
+  //创建Worker对象
+  Worker* worker = new Worker;
+  //将worker对象移动到子线程中
+  worker->moveToThread(&workerThread);//关键代码
+  //通过某信号，触发worker的槽函数执行
+  connect(xx,SIGNAL(xx),worker,SLOT(doWork()));
+  //开启子线程
+  workerThread.start();
+
+
+2 创建线程方法2：继承QThread，重写run函数
+	class WorkerThread:public QThread{
+		void run(void){
+			//耗时或阻塞代码，需要放在子线程中执行
+		}
+	};
+	WorkerThread workerThread;
+	//子类重写的run函数将被执行(子线程)
+	workerThread.start();
+	
+案例：多线程打印消息
+方法一 工程：Thread1
+方法二 工程：Thread2
+
+3 线程同步//了解
+1）互斥锁：QMutex
+	QMutex mutex;
+	void run(void){
+		//mutex.lock();
+		QMutexLocker locker(&mutex);//加锁
+		注：线程结束，QMutexLocker在析构函数中解锁
+		//访问共享资源
+		if("Error1"){
+			//mutex.unlock();
+			return;
+		}
+		if("Error2"){
+			//mutex.unlock();
+			return;
+		}
+		...
+		//访问结束
+		//mutex.unlock();
+	}
+
+2）读写锁：QReadWriteLock
+QReadWriteLock lock;
+void ReaderThread::run(){//读操作线程
+    ...
+    lock.lockForRead();
+    read_file();
+    lock.unlock();
+    ...
+}
+void WriterThread::run(){//写操作线程
+    ...
+    lock.lockForWrite();
+    write_file();
+    lock.unlock();
+    ...
+}
+
+3）信号量：QSemaphore
+//初始化信号计数5：表示有5个可用的共享资源
+QSemaphore sem(5);//sem.available() == 5
+//获取3个资源，剩余2个
+sem.acquire(3); //sem.available() == 2
+//获取2个资源，剩余0个
+sem.acquire(2); // sem.available() == 0
+//释放5个资源，剩余5个
+sem.release(5); // sem.available() == 5
+//再分配5个资源，剩余10个
+sem.release(5);  // sem.available() == 10
+//尝试获取1个资源，成功，剩余9个
+sem.tryAcquire(1);//sem.available()==9,true
+//尝试获取250个资源，失败，剩余9个
+sem.tryAcquire(250);//sem.available()==9,false

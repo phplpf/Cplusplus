@@ -1,0 +1,142 @@
+回顾：
+1 目录操作：QDir
+2 定时器：
+1）定时器事件，timerEvent()
+2）定时器类，QTimer
+3 鼠标事件：QMouseEvent
+1)mousePressEvent()
+2)mouseReleaseEvent()
+3)mouseMoveEvent()
+4)mouseDoubleClickEvent()
+4 键盘事件：QKeyEvent
+1)keyPressEvent()
+2)keyReleaseEvent()
+5 Qt多线程(QThread)
+1)moveToThread()
+2)继承QThread，重写run函数
+6 线程同步
+1)互斥锁：QMutex
+2)读写锁：QReadWriteLock
+3)信号量：QSemaphore
+
+-----------------------
+今天：
+一 Qt网络编程
+1 网络层次模型(OSI七层)
+1）应用层：Http、FTP、Pop3、SMTP...
+2）表示层
+3）会话层
+4）传输层：UDP、TCP
+5）网络层：IP协议
+6）数据链路层
+7）物理层
+
+2 IP地址
+1）互联网中唯一的地址标识
+2）IPv4(32位)、IPv6(128位)
+3）IPv4地址表示方式
+--》点分十进制 “xx:xx:xx:xx"
+--》十六进制数 0x12345678
+eg:
+	"192.168.15.100"//点分十进制 
+   0xC0A80F64 //十六进制数
+4）查看IP地址指令
+linux:ifconfig
+window:ipconfig
+5）专用的IP地址
+"0.0.0.0" //任意地址(INADDR_ANY)
+"127.0.0.1" //本地环回地址
+"255.255.255.255"//广播地址
+6）通过IP判断两个主机是否连通
+ping 对方IP地址;
+
+3 Qt网络编程相关类
+1）QHostAddress//IP地址
+   QHostAddress ip("xx.xx.xx.xx");
+   QHostAddress ip;
+   ip.setAdress("xx.xx.xx.xx");
+   
+   QHostAddress::Any //"0.0.0.0"
+   QHostAddrsss::LocalHost //"127.0.0.1"
+   QHostAddress::Broadcast //"255.255.255.255"
+
+2）QAbstractSocket//套接字基类
+   bool bind(ip,port);//绑定IP和端口
+   void connectToHost(ip,port);//连接服务器
+   void disconnectFromHost();//断开连接
+   SocketState state();//获取套接字的状态
+   qint64 bytesAvailable();//获取等待读取消息字节数
+
+   void connected()[signal]//连接服务器成功发送
+   void disconnected()[singal]//断开服务器连接时发送
+   void readyRead()[signal]//套接字有新数据时发送
+   void error(SocketError)[singal]//网络异常时发送
+
+	//读操作(接收网络消息)
+	qint64 read(char* data,qint64 size);
+	QByteArray read(qint64 size);
+	QByteArray readAll();
+	
+	//写操作(发送网络消息)
+	qint64 write(const char* data,qint64 size);
+	qint64 write(const char* data);
+	qint64 write(const QByteArray& byteArray);
+	
+4 UDP编程(QUdpSocket)
+	//接收数据包
+	qint64 readDatagram(char* data,qint64 size,
+		/*QHostAddress ip,quint16 port*/);
+	
+	//发送数据包
+	qint64 writeDatagram(const char*data,qint64 size,
+		const QHostAddress& ip,quint16 port);
+	qint64 writeDatafram(const QByteArray& datagram,
+		const QHostAddress& ip,quint16 port);
+	
+	//判断是否有等待读取的数据包
+	bool hasPendingDatagrams();
+	
+	//获取等待读取的数据包大小
+	qint64 pendingDatagramSize();
+
+案例：UDP网络广播
+1）发送端
+--》广播地址：255.255.255.255
+--》广播端口：8888
+--》用户输入广播消息，每隔1秒发送一次
+工程名：Sender，SenderDialog
+
+
+2）接收端
+--》绑定接收广播IP：“0.0.0.0”
+--》绑定接收广播端口：8888
+--》接收广播消息并显示
+工程名：Receiver，ReceiverDialog
+
+5 TCP编程
+1）QTcpSocket//TCP通信套接字
+2）QTcpServer//TCP服务器
+   //设置监听服务器的IP和端口
+   bool listen(serverIp,serverPort);
+   //有新的客户端和服务器建立连接时将被发送
+   void newConnection()[signal]
+   //获取和客户端通信的套接字
+   QTcpSocket* nextPendingConnection()
+   
+案例：网络聊天室
+1）服务器：
+--》QTcpServer创建TCP服务器
+--》响应客户端连接请求，保存和客户端通信的套接字
+--》接收客户端的聊天消息
+--》转发聊天消息给其它客户端
+工程名：Server，ServerDialog
+
+2）客户端：
+--》使用QTcpSocket创建套接字  
+--》向服务器发送连接请求
+--》获取用户输入聊天消息，发送到服务器
+--》接收服务器转发的消息并显示
+工程名：Client，ClientDialog
+
+   
+   

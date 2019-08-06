@@ -1,0 +1,72 @@
+回顾：QT网络编程
+1）QHostAddress//IP地址
+2）QAbstractSocket//套接字基类
+3）QUdpSocket//UDP套接字
+4）QTcpServer//TCP服务器
+5）QTcpSocket//TCP套接字
+--------------------------------
+今天：
+1 多窗口编程
+1）先显示子窗口，在显示主界面//windows1
+2）先显示主界面，在弹出子窗口//windows2
+3）同时显示多个窗口//window3
+注：一般子窗口推荐使用QDialog
+
+2 QMainWindow主窗口使用
+工程名：MainWindow
+
+-------------------------------------
+项目：Http客户端(代码下载器)
+1 需求分析
+实现从“http://code.tarena.com.cn/”下载代码
+1）显示下载代码界面
+2）处理目录链接
+3）实现文件下载功能
+
+2 概要设计
+3 详细设计
+4 编写代码
+5 测试运行
+*6 代码重构
+7 产品发布
+8 升级维护
+-----------------------------------
+Http协议简介：
+1）请求：客户端给服务器发送消息
+--》请求行 
+--》请求头
+--》空行 “\r\n”
+--》可选消息体
+
+2）响应：服务器给客户端返回消息
+--》响应头行(状态行)
+--》响应头域
+--》空行 “\r\n”
+--》消息体
+
+------------------------
+QT中相关类：
+1）QNetworkAccessManager//管理通信过程
+2）QNetworkRequest //请求
+3）QNetworkReply //响应
+4）QUrl	//网络地址
+eg:
+  http://code.tarena.com.cn/www/xx.tar.gz
+5）QDir/QFile/QFileInfo //目录或文件操作
+6）QTextBrowser //文本浏览器(控件)
+
+工程名：HttpClient
+类名：MainWindow
+
+----------------------
+忽略下面提示：
+qt.network.ssl: QSslSocket: cannot resolve SSLv2_client_method
+qt.network.ssl: QSslSocket: cannot resolve SSLv2_server_method
+----------------------
+任务：
+1）在验证登录增加登录对话框，用户名和密码信息从登录对话框获取。
+2）将下载文件操作，放到子线程中执行，实现多文件的同时下载
+3）下载文件时，指定保存在“/home/tarena/Downloads”目录下面
+
+参考代码：refer.tar.gz
+17:00讲

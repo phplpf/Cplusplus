@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/new/prefix1">
+        <file>王建立.jpeg</file>
+    </qresource>
+</RCC>
