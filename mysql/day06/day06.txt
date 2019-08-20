@@ -1,0 +1,178 @@
+1. 常用的数据库访问技术
+ 1.1 proc/c++      c/c++访问Oracle数据库
+ 1.2 odbc/ado      VC访问数据库的技术
+ 1.3 jdbc          java访问数据库的技术
+2. C语言中访问MySQL数据库
+ Linux：  API函数
+ Windows: odbc/ado
+
+3. C语言连接MySQL服务器
+ 3.1 相关的函数
+  1) MYSQL类型
+   该结构代表一个数据库连接的句柄。几乎所有MySQL函数会使用。
+  2) mysql_init()函数
+   函数原型：
+    MYSQL* mysql_init(MYSQL* mysql)
+   功能：
+    分配或初始化与mysql_real_connect()相适应的MYSQL对象。
+  3) mysql_real_connect()函数
+   函数原型：
+   MYSQL* mysql_real_connect(
+      MYSQL* mysql,		// 已有的MYSQL结构的地址
+      const char* host,		// 主机名或IP地址
+      const char* user,		// 登录名
+      const char* pwd,		// 密码
+      const char* db,		// 数据库名
+      unsigned int port,	// 端口号      0
+      const char* unix_socket,  // 套接字或命名管道   NULL
+      unsigned long client_flag // 一般为 0
+   )
+   功能：
+     和运行在主机上的MySQL数据库引擎建立连接。
+   返回值：
+     如果连接成功，返回MYSQL*连接句柄(和第一个参数一样)
+     如果连接失败，返回NULL
+
+  4) mysql_close()函数
+   函数原型：
+    void mysql_close(MYSQL* mysql)
+   功能：
+    关闭前面打开的连接
+
+  案例：本地连接 01conn.c
+   #include <mysql/mysql.h>
+   gcc 01conn.c -lmysqlclient
+
+   远程连接:  02rconn.c
+    
+4. dml操作
+ 4.1 相关的函数
+  1) mysql_query()函数
+   函数原型：
+    int mysql_query(MYSQL* mysql,const char* query)
+   功能：
+    执行query指向的SQL语句。
+   返回值：
+    如果执行成功，返回0.如果出现错误，返回非0值。
+  2) mysql_affected_rows()函数
+   函数原型：
+    unsigned int mysql_affected_rows(MYSQL* mysql)
+   功能：
+    执行dml操作时，返回影响的行数   
+
+ 4.2 insert语句
+  案例：向选课系统数据库choose中的学生表student中插入一行数据
+   /* 设置字符集 */
+   mysql_query(&mysql,"set character set utf8");
+
+   03insert.c
+  
+ 4.3 delete语句
+  案例：根据输入的学号删除学生信息
+   04delete.c
+ 
+ 4.4 update语句
+  sprintf(sqlstr,"update student set student_name='%s',student_contact='%s',class_no=%d where student_no='%s'",
+    stuname,phone,c_no,stuno);
+
+5. select操作
+ 5.1 相关的函数
+  1) mysql_store_result()函数
+   MYSQL_RES:  用来接收结果集
+
+   函数原型：
+    MYSQL_RES* mysql_store_result(MYSQL* mysql)
+   功能：
+    对于成功检索了数据的操作(select、show、desc等),将查询的结果全部读取到客户端.
+   返回值：
+    成功时，返回MYSQL_RES结果集。出现错误时，返回NULL
+  2) mysql_free_result()函数
+   函数原型：
+    void mysql_free_result(MYSQL_RES* res)
+   功能：
+    释放结果集
+  3) mysql_num_fields()函数
+   函数原型：
+    unsigned int mysql_num_fields(MYSQL_RES* res)
+   功能：
+    返回结果集中的列数
+  4) mysql_num_rows()函数
+   函数原型：
+    my_ulonglong mysql_num_rows(MYSQL_RES* res)
+   功能：
+    返回结果集中的行数
+  5) mysql_field_count()函数
+   函数原型：
+    unsigned int mysql_field_count(MYSQL* mysql)
+   功能：
+    返回最近的查询的列数
+    如果执行的是dml操作，返回0
+   
+
+   案例：05select.c
+
+   6) mysql_fetch_fields()函数
+    函数原型：
+     MYSQL_FIELD* mysql_fetch_fields(MYSQL_RES* mysql)
+    功能：
+     对于结果集，返回MYSQL_FIELD结构的数组
+
+     MYSQL_FIELD: 数据结构，包含有关字段的信息。
+       name: 字段名
+       table: 字段所在的表名
+       ...
+   7) mysql_fetch_row()函数
+    函数原型：
+     MYSQL_ROW mysql_fetch_row(MYSQL_RES* res)
+    功能:
+     检索结果集中的下一行
+    返回值：
+     下一行的MYSQL_ROW结构
+     如果没有更多的要检索的行或出错，返回NULL 
+
+
+    案例：06select.c
+     ...
+     MYSQL_FIELD* fields;
+     MYSQL_RES* res;
+     ...
+     fields = mysql_fetch_fields(res);
+     int i=0;
+     for(i=0;i<num_fields;i++){
+       printf("字段名:%s,表名:%s\n",fields[i].name,fields[i].table);
+     }
+
+ 练习：查询学生及其所在班级的信息，包括学号、姓名和班级名称
+  
+
+
+
+ 6.获取错误信息的函数
+  6.1 相关的函数
+   1) mysql_errno()函数
+    函数原型：
+     unsigned int mysql_errno(MYSQL* mysql)
+    功能：
+     对于由mysql指定的连接，返回最近调用的mysql_xxx()API函数的错误代码
+     没有错误，返回0
+   2) mysql_error()函数
+    函数原型
+     const char* mysql_error(MYSQL* mysql)
+    功能:
+     对于由mysql指定的连接，当mysql_xxx()函数执行失败时，返回包含错误信息的字符串.
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+  

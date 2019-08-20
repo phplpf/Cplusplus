@@ -1,0 +1,429 @@
+1.MySQL编程的基础知识
+ 1.1 用户自定义变量
+  1.1.1 用户会话变量
+   只在当前会话中可见，属于弱类型
+   定义方式：set、select
+   1) set
+    -- 语法
+    set @变量名1 = 表达式1[,@变量名2 = 表达式2,...];
+    -- 示例
+    set @user_name='张三';
+    select @user_name;
+    set @user_name=100,@age=18;
+    select @user_name,@age;
+    set @age=@age+1;
+    select @age;
+   
+   2) select
+    -- 语法
+    select @变量名:=表达式[,...];
+    或
+    select 表达式 into @变量名;
+    -- 示例
+    select @user_name:='李四'; -- 产生结果集
+    select 20 into @age;
+    select @age;
+
+   3) 用户会话变量和SQL语句
+    set @cnt=(select count(*) from student);
+    select @cnt;
+
+    select @cnt:=(select count(*) from student);
+    可以简化成：
+    select @cnt:=count(*) from student;
+
+    select count(*) into @cnt from student;
+    select @cnt;
+  
+  1.1.2 局部变量
+   -- 语法
+   declare 变量名 数据类型[ default 值];
+   -- 示例
+   declare stu_cnt int;
+   declare i int default 0;
+   局部变量使用时必须在存储程序中。
+  
+ 1.2 begin...end语句块
+  -- 语法
+  begin
+   局部变量的声明;
+   错误触发条件的声明;
+   游标的声明;
+   错误处理程序的声明;
+   业务逻辑代码;
+  end;
+
+ 1.3 重置命令结束标识
+  delimiter $$  -- 把命令结束标识设置为 $$  
+   ...
+  delimiter ;   -- 把命令结束标识改回 ;
+
+2. 自定义函数 function
+ 2.1 创建函数的语法
+  create function 函数名(参数列表) returns 返回值的数据类型
+  begin
+    函数的主体
+    return语句;
+  end;
+ 2.2 函数的创建和调用
+  2.2.1 无参的函数
+   -- 创建函数，实现为查询结果集添加行号
+   delimiter $$
+   create function fn_rowno() returns int
+   begin
+     set @rowno = @rowno+1;
+     return @rowno;
+   end;
+   $$
+   delimiter ;
+   -- 调用
+   set @rowno=0;
+   select fn_rowno() 行号,student_no 学号,student_name 姓名,
+     class_no 班号 from student;
+  
+  2.2.2 带参的函数
+   -- 创建函数，实现根据学号查询学生的姓名
+   delimiter $$
+   create function fn_getname(stu_no char(11)) returns char(10)
+   begin
+     declare stu_name char(10);
+     select student_name into stu_name from student
+        where student_no = stu_no;
+     return stu_name;
+   end;
+   $$
+   delimiter ;
+   -- 调用
+   select fn_getname('2018001');
+
+练习：创建函数，根据学号查询选修课程数
+ -- 创建
+ create function fn_getcoursenum(stu_no char(11)) returns int
+ begin
+   declare coursenum int;
+   select count(*) into coursenum from choose
+      where student_no=stu_no;
+   return coursenum;
+ end; 
+ -- 调用
+ select fn_getcoursenum('2018001');
+
+ 2.3 查看函数
+  1) show function status\G
+  2) 查看指定数据库中的函数
+    select db,name,type from mysql.proc
+     where db='数据库名' and type='function';
+    
+    select * from mysql.proc
+      where db='choose' and type='function'
+        and name='fn_getname'\G
+
+ 2.4 删除函数
+  drop function 函数名;
+
+3. 流程控制语句
+ 3.1 分支语句
+  3.1.1 if语句
+   1) 语法
+     -- 简单if
+     if 条件 then     
+        语句块;
+     end if;
+     -- if..else
+     if 条件 then
+        语句块1;
+     else
+        语句块2;
+     end if;
+     -- 多分支
+     if 条件1 then
+        语句块1;
+     elseif 条件2 then
+        语句块2;
+     ...
+     [else 语句块n;]
+     end if;
+
+   2）练习：创建函数，传入三个数字，返回最大值
+    -- 创建
+    delimiter $$
+    create function fn_getmax(a int,b int,c int) returns int
+    begin
+      declare n_max int;
+      set n_max=a;
+      if b>n_max then
+         set n_max=b;
+      end if;
+      if c>n_max then
+         set n_max=c;
+      end if;
+      return n_max;
+    end;
+    $$
+    delimiter ;
+    -- 测试
+    select fn_getmax(100,20,120);
+
+   3)  示例：改写前面的fn_getname函数，实现根据学生学号或教师工号查询对应的姓名
+   drop function fn_getname;
+   -- 创建
+   create function fn_getname(no char(11),role char(20))
+      returns char(10)
+   begin
+     declare name char(10);
+     if role='teacher' then
+       select teacher_name into name from teacher
+          where teacher_no=no;
+     elseif role='student' then
+       select student_name into name from student
+          where student_no=no;
+     else
+       set name='输入错误';
+     end if;
+     return name;
+   end;
+   -- 测试
+   select fn_getname('2018001','student');
+   select fn_getname('002','teacher');
+   select fn_getname('007','teacher');
+   select fn_getname('001','tea');
+   
+  3.1.2 case语句
+   1) 语法
+    case 表达式
+      when 值1 then 语句块1;
+      when 值2 then 语句块2;
+      ...
+      else 语句块n;
+    end case;
+   2) 示例
+    创建函数，根据日期判断并打印星期几
+    create function fn_getweek(week_no int) returns char(20)
+    begin
+      declare week char(20);
+      case week_no
+        when 0 then set week='星期一';
+        when 1 then set week='星期二';
+        when 2 then set week='星期三';
+        when 3 then set week='星期四';
+        when 4 then set week='星期五';
+        when 5 then set week='星期六';
+        else set week='星期日';
+      end case;
+      return week;
+    end;
+   
+    select now() 日期,fn_getweek(weekday(now())) 星期;
+    select fn_getweek(weekday('2000-01-01'));
+   
+ 3.2 循环语句
+  3.2.1 while循环
+    1）语法
+     [循环标签:]while 循环条件 do
+       循环操作
+     end while [循环标签];
+    2) 示例
+     创建函数，实现1..n的累加
+     create function fn_getsum1(n int) returns int
+     begin
+       declare i int default 0;      -- int i=0;
+       declare sum int default 0;    -- int sum=0;
+       while i<n do                  -- while(i<n){
+         set i=i+1;                  --   i++;
+         set sum=sum+i;              --   sum+=i;
+       end while;                    -- }
+       return sum;
+     end;
+
+     select fn_getsum1(100);
+
+   3.2.2 leave语句    -- 相当于C语言中的break
+    1) 语法
+      leave 循环标签;
+    2) 示例 
+     创建函数，实现1..n的累加，使用leave语句结束循环
+     create function fn_getsum2(n int) returns int
+     begin
+       declare i int default 0;
+       declare sum int default 0;
+       add_sum:while true do
+         set i=i+1;
+         set sum=sum+i;
+         if i=n then               -- if(i==n){
+           leave add_sum;          --   break;
+         end if;                   -- }
+       end while add_sum;       
+       return sum;
+     end;
+   3.2.3 iterate语句    -- 相当于C语言中的continue
+    1) 语法
+      iterate 循环标签;
+    2) 示例
+       创建函数，实现1..n的偶数的累加和
+     create function fn_getsum3(n int) returns int
+     begin
+       declare i int default 0;
+       declare sum int default 0;
+       add_sum:while i<n do
+         set i=i+1;
+         if i%2!=0 then         -- if(i%2){
+           iterate add_sum;     --   continue;
+         end if;                -- }
+         set sum=sum+i;
+       end while add_sum;       
+       return sum;
+     end;
+     
+   3.2.4 repeat循环
+    1) 语法
+      [循环标签:]repeat
+        循环操作;
+        until 条件表达式
+      end repeat [循环标签];
+      重复执行循环操作，知道条件表达式的值为真
+    2) 示例
+      创建函数，实现1..n的累加和
+      create function fn_getsum4(n int) returns int
+      begin
+        declare i int default 0;
+        declare sum int default 0;
+        repeat
+          set i=i+1;
+          set sum=sum+i;
+          until i=n
+        end repeat;
+        return sum;
+      end;
+ 
+  3.2.5 loop语句
+   1) 语法
+     [循环标签:]loop
+       循环操作;
+       if 条件表达式 then
+         leave 循环标签;
+       end if;
+     end loop [循环标签];
+   2) 示例
+    创建函数，实现1..n的累加
+    create function fn_getsum5(n int) returns int
+    begin
+      declare i int default 0;
+      declare sum int default 0;
+      add_sum:loop
+        set i=i+1;
+        set sum=sum+i;
+        if i=n then
+          leave add_sum;
+        end if;
+      end loop add_sum;
+      return sum;
+    end;
+
+4. 系统函数
+ 4.1 数学函数
+  1) 求近似值函数
+   round(x[,y]):     四舍五入
+       y的取值：
+            缺省      四舍五入到个位(整数)
+            正整数    四舍五入到小数点后y位  round(3.456,2)=3.46
+            负整数    四舍五入到小数点前|y|位 round(365.6,-2)=400
+   truncate(x,y):    截断
+       y的取值： 
+            正整数    截断到小数点后y位  truncate(3.456,2)=3.45
+            负整数    截断到小数点前|y|位 truncate(365.6,-2)=300
+   ceil(x):          返回大于等于x的最小整数
+   floor(x):         返回小于等于x的最大整数
+  2) 随机数
+   rand():           返回随机数  
+
+ 4.2 字符串函数
+  length(str):       返回字符串str占用的字节数
+  char_length(str):  返回字符串str的长度
+    select length('张三') 字节数,char_length('张三') 长度;
+  concat(s1,s2,...): 拼接字符串
+  left(str,n):       返回字符串str左侧的n个字符
+  right(str,n):      返回字符串str右侧的n个字符
+  substring(str,start[,n]): 从str的start位置开始，向右截取n个字符
+     其中：
+       start  表示开始截取的位置,从1开始
+           >0 表示从左侧定位
+           <0 表示从右侧定位
+       n      表示截取字符串的长度，缺省时，表示截取到字符串的最后
+     select substring('Hello World!',7,5);   
+     select substring('Hello World!',-6,5);
+     select substring('Hello World!',-6);
+  lower(str): 返回字符串str的全小写形式  
+  upper(str): 返回字符串str的全大写形式
+  ltrim(str): 去掉字符串str左侧的空格
+  rtrim(str): 去掉字符串str右侧的空格
+  trim(str):  去掉字符串str两侧的空格
+  replace(str,a,b): 用b替换字符串str中的a
+
+ 4.3 日期和时间函数
+  curdate():    获取服务器当前日期
+  curtime():    获取服务器当前时间
+  now():        获取当前服务器的日期和时间 可以给一个<=6的参数，获取更精确的时间
+  year(d):         年
+  month(d):        月
+  dayofmonth(d):   日
+  hour(t):         时
+  minute(t):       分
+  second(t):       秒
+  microsecond(x):  微秒
+  dayname(d):      星期几
+  week(d):         一年中的第几周
+  monthname(d):    月份名
+  datediff(d1,d2): 返回两个日期相差的天数
+
+  select year(curdate())        年,month(curdate())   月,
+         dayofmonth(curdate())  日,hour(curtime())    时,
+         minute(curtime())      分,second(curtime())  秒,
+         microsecond(now(6))  微秒,dayname(curdate()) 星期,
+         monthname(curdate()) 月份;
+  select week(curdate()) 周数,
+         datediff(curdate(),'2000-01-01') 相差的天数;
+
+  -- 列出选课时间为2018年的信息
+  select student_no,course_no,choose_time from choose
+    where year(choose_time)=2018;
+
+ 4.4 条件控制函数
+  1) if()函数
+    if(条件表达式,值1,值2):当条件表达式成立时返回值1,否则返回值2.
+    -- 示例
+    select student_no 学号,course_no 课程编号,score 成绩,
+      if(score>=60,'是','否') 是否通过 from choose;
+    -- 使用case运算符
+    select student_no 学号,course_no 课程编号,score 成绩,
+      case 
+        when score>=90 then '优秀'
+        when score between 80 and 89 then '良好'
+        when score between 60 and 79 then '及格'
+        else '不及格'
+      end  级别
+    from choose;    
+
+   2) ifnull()函数
+     ifnull(par1,par2): 当par1不为null时，返回par1
+                        当par1为null时，返回par2
+     -- 示例
+     -- null值参与运算，会造成整个表达式结果为null
+     select stu_no 学号,exam_score 卷面成绩,d_score 平时成绩,
+       exam_score*0.8 + d_score*0.2 综合成绩 from exam;
+
+     
+     select stu_no 学号,exam_score 卷面成绩,d_score 平时成绩,
+       ifnull(exam_score,0)*0.8 + ifnull(d_score,60)*0.2 综合成绩 from exam;
+
+
+
+
+
+
+
+
+
+
+
+
+

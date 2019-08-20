@@ -1,0 +1,439 @@
+1.复制表结构
+ 1.1 复制表结构
+  --语法
+  create table 新表名 like 源表名;
+  -- 示例
+  create table stu like student; 
+ 1.2 使用结果集创建表
+  -- 语法
+  create table 新表名 select语句;
+  -- 示例
+  create table stu2 select * from stu;
+
+2. 表记录的更新操作(DML)
+ 2.1 insert语句
+  2.1.1 向表中插入一行数据
+   -- 语法
+   insert into 表名[(字段列表)] values(值列表);
+   注意：字段列表和值列表的数量、数据类型必须一致
+        缺省字段列表，代表的是按照表结构中字段的顺序和数量给出的全部字段
+   -- 示例
+   1) 向指定表中的全部字段插入数据
+    向教师表teacher中插入如下数据:
+     ---------------------------------------------------
+     teacher_no		teacher_name	teacher_contact
+     ---------------------------------------------------
+       '001'		  '李老师'        '11000000000'
+       '002'              '王老师'        '12000000000'
+       '003'              '孙老师'        '13000000000'
+     ---------------------------------------------------
+   SQL语句如下：
+   insert into teacher(teacher_no,teacher_name,teacher_contact)
+       values('001','李老师','11000000000');
+   insert into teacher(teacher_name,teacher_no,teacher_contact)
+       values('王老师','002','12000000000');
+   insert into teacher values('003','孙老师','13000000000');
+
+   2) 在指定的字段插入数据(自增长字段)
+    向班级表classes中插入如下数据:
+    ----------------------------------------
+      class_name	department_name
+    ----------------------------------------
+     '2018自动化1班'       '机电工程'
+     '2018自动化2班'       '机电工程'
+     '2018自动化3班'       '机电工程'
+    ----------------------------------------
+    SQL语句如下：
+    insert into classes values(null,'2018自动化1班','机电工程');
+    insert into classes(class_name,department_name)
+             values('2018自动化2班','机电工程');
+    insert into classes values(3,'2018自动化3班','机电工程');
+
+   3) 使用默认值
+    向课程表course中插入如下数据:
+    ---------------------------------------------------------
+    course_name	  up_limit   description  status  teacher_no
+    ---------------------------------------------------------
+     'C语言'        60         '暂无'      '已审核'   '001'
+     'C#'          150        '暂无'      '已审核'   '002'
+     'MySQL'       230         '暂无'     '已审核'    '003'
+    ---------------------------------------------------------
+    SQL语句如下：
+    -- 使用默认值
+    insert into course
+         values(null,'C语言',default,'暂无','已审核','001');
+    或
+  insert into course(course_name,description,status,teacher_no)
+    values('C语言','暂无','已审核','001');
+    -- 不使用默认值
+    insert into course
+        values(null,'C#',150,'暂无','已审核','002');
+    insert into course
+        values(null,'MySQL',230,'暂无','已审核','003');
+    #错误 违反了外键约束 teacher表不存在工号为'007'的数据
+    insert into course 
+        values(null,'C++',150,'暂无',default,'007');
+    #错误 违反了唯一约束 course中存在工号为'001'的数据行
+    insert into course 
+        values(null,'C++',150,'暂无',default,'001');
+    -- 向教师表teacher中插入一行数据
+    insert into teacher values('004','宋老师','14000000000');
+    -- 向课程表中插入一行数据
+    insert into course 
+        values(null,'C++',150,'暂无',default,'004');
+
+  2.1.2 批量插入多行数据
+   -- 语法
+   insert into 表名[(字段列表)] values
+   (值列表1),
+   (值列表2),
+   ...
+   (值列表n);
+   -- 示例
+    向学生表student中插入如下数据:
+    -----------------------------------------------------
+    student_no   student_name  student_contact  class_no
+    -----------------------------------------------------
+    '2018001'      '张三'       '15000000000'      1
+    '2018002'      '李四'       '16000000000'      1
+    '2018003'      '王五'       '17000000000'      3
+    '2018004'      '马六'       '18000000000'      2
+    '2018005'      '田七'       '19000000000'      2
+    ----------------------------------------------------
+    SQL语句如下：
+    insert into student values
+     ('2018001','张三','15000000000',1),
+     ('2018002','李四','16000000000',1),
+     ('2018003','王五','17000000000',3),
+     ('2018004','马六','18000000000',2),
+     ('2018005','田七','19000000000',2);
+   
+   2.1.3 使用insert...select语句插入结果集
+    -- 语法
+    insert into 目标表名[(字段列表1)] select 字段列表2 from 源表名[ where 子句];
+    -- 示例
+    insert into stu2 select * from student;
+
+  2.2 update语句
+   2.2.1 作用
+    根据条件修改表中的数据
+   2.2.2 语法
+    update 表名 set 字段=新值[,字段=新值,...] [where 条件表达式];
+   2.2.3 示例
+    -- 创建表
+    drop table exam;
+    create table exam(
+      stu_no int primary key auto_increment,
+      exam_score tinyint unsigned,
+      d_score tinyint unsigned
+    );
+    -- 测试数据
+    insert into exam values(null,98,90);
+    insert into exam values(null,80,80);
+    insert into exam values(null,58,70);
+    insert into exam values(null,53,70);
+    insert into exam values(null,30,50);
+    -- 每人加5分(没有where子句的update语句)
+    update exam set exam_score=exam_score+5;
+    -- 将成绩大于100的，改为100(有where子句update语句)
+    update exam set exam_score=100 where exam_score>100;
+    -- 将成绩在[55,59]的成绩改为60(两个条件)
+    update exam set exam_score=60
+         where exam_score>=55 and exam_score<=59;
+    -- 更新多个字段
+    update exam set exam_score=61,d_score=75
+       where stu_no=4;
+
+    -- 将'张三'的班号改为4
+    #错误 违反了外键约束  在classes表中不存在class_no=4的数据
+    update student set class_no=4 where student_name='张三';
+    #错误 违反了外键约束  主表classes中class_no=1被从表引用
+    update classes set class_no=4 where class_no=1;
+
+  2.3 delete语句
+   2.3.1 作用
+    删除表中符合条件的数据行
+   2.3.2 语法
+    delete from 表名 [where 条件表达式];
+   2.3.3 示例
+    -- 删除表stu2中student_contact值为'123'的数据行
+    delete from stu2 where student_contact='123';
+    -- 删除表stu2中的全部数据
+    delete from stu2;
+
+    -- 删除classes表中class_no=1的数据
+    #错误 违反了外键约束
+    delete from classes where class_no=1;
+    
+   2.3.4 truncate语句 -- 不属于dml语句
+    截断表
+    -- 语法
+    truncate table 表名;
+    -- 示例
+    1) truncate语句不能用于主表
+    truncate table student; #错误
+    delete from student;    -- 正确
+    2) 对于有自增长字段的表，使用truncate语句截断表，自增长字段的值恢复初始值
+     delete from exam;
+     insert into exam values(null,80,90);
+     truncate table exam;
+     insert into exam values(null,80,90);
+    3) 使用truncate语句截断表，不能回滚
+
+3.select语句
+ 3.1 select语句概述
+  3.1.1 语法
+    select 字段列表
+     from 数据源
+       where 条件表达式
+         group by 分组字段
+           having 条件表达式
+             order by 排序字段 排序方式
+   其中：
+    字段列表:     指定检索字段
+    数据源：	 检索的表或视图
+    where子句：   指定数据行的检索条件
+    group by子句：根据分组字段把表中的数据分成若干组，并进行汇总统计
+    having子句：  对分组后的结果进行筛选
+    order by子句：对结果集进行排序  默认升序
+   
+   3.1.2 使用select子句指定字段列表
+    字段列表的指定方式：
+    *:		代表数据源中的全部字段
+    字段列表：	使用逗号隔开的若干个字段
+    表名.*:	在多表查询中，指定某个表中的全部字段
+    表名.字段:	在多表查询中，指定某个表中的某个字段
+    表达式：	表达式中可以包含算数运算、函数等
+    
+    1) 使用表达式
+     select version(),now(),pi();
+    2) 命名别名
+     -- 语法
+     字段或表达式 [as] 别名;
+     -- 示例
+     select version() as 版本,now() 服务器时间,pi() 派;
+
+ 3.2 基本查询语句
+  3.2.1 语法
+   select 字段列表 from 表名;
+  3.2.2 示例
+   -- 列出表中全部字段
+   select * from student;
+   select student_no,student_name,student_contact,class_no
+      from student;
+   -- 列出部分字段
+   select student_no,student_name,class_no from student;
+   -- 为字段命名别名
+   select student_no as 学号,student_name 姓名,class_no 班号
+        from student;
+   -- 使用表达式
+   select stu_no 学号,exam_score 卷面成绩,d_score 平时成绩,
+     exam_score*0.8 + d_score*0.2 最终成绩 from exam;
+   
+  3.2.3 distinct
+   -- 作用
+    对结果集进行排重显示
+   -- 语法
+   select distinct 字段列表 from ...;
+   -- 示例
+   -- 选择当前数据库
+   use information_schema;
+   -- 查看表
+   show tables;
+   desc tables; -- tables是information_schema数据库中的表名
+   
+   select table_schema,table_type
+        from information_schema.tables;
+   -- 单列排重
+   select distinct table_type
+        from information_schema.tables;
+   -- 多列排重
+   select distinct table_schema,table_type
+        from information_schema.tables;
+
+   3.2.4 limit (分页)
+    -- 作用
+    限制返回行数
+    -- 语法
+     select 字段列表 from 表名
+      limit [start],length;
+     其中:
+       start: 表示从第几行数据开始检索  默认为0  表示第一行
+       length: 表示检索的行数 (每页的行数)
+    -- 示例
+    -- 列出information_schema.tables表中的前10行
+    select table_schema 数据库名,table_name 表名
+        from information_schema.tables
+          limit 10;
+    -- 练习：每页10行，显示第7页
+    select table_schema 数据库名,table_name 表名
+        from information_schema.tables
+          limit 60,10;
+
+ 3.3 多表查询
+  -- 需求：列出学生及其所在班级的信息，包括学号、姓名和班级名称
+   学号、姓名： student
+   班级名称:   classes
+   关联条件(连接条件)：student.class_no = classes.class_no
+
+  3.3.1 多表查询的类型
+   内连接：符合连接条件的数据行被检索出来，不符合条件的被过滤掉
+   外连接：外连接的结果集 = 内连接的结果集+匹配不上的数据
+  3.3.2 内连接
+   -- 语法
+   select 字段列表
+     from 表1 [inner] join 表2 on 连接条件;
+   -- 示例
+   select student.student_no 学号,student.student_name 姓名,
+        classes.class_name 班级名称
+     from student join classes
+       on student.class_no=classes.class_no;
+   -- 分别向student表和classes各插入一行数据
+   insert into student(student_no,student_name,student_contact)
+    values('2018006','小李','20000000000');
+   insert into classes values(null,'2018电子信息','信息学院');
+
+   -- 表的别名
+   表名 [as] 别名
+   select s.student_no 学号,s.student_name 姓名,c.class_name 班级
+     from student s join classes c
+       on s.class_no = c.class_no;
+   #错误 表一旦命名别名，该语句中只能使用别名，不能使用原表名
+   select s.student_no 学号,s.student_name 姓名,c.class_name 班级
+     from student s join classes c
+       on s.class_no = classes.class_no;
+                      ~~~~~~~~~
+   -- 如果连接的两张表中，没有重名的字段名可以省略字段前的表名或别名
+   select student_no 学号,student_name 姓名,class_name 班级
+     from student s join classes c
+       on s.class_no = c.class_no;
+
+   -- 练习：列出教师及其所授课程的信息，包括教师工号、姓名、课程名称和人数
+   select t.teacher_no 工号,t.teacher_name 姓名,
+     c.course_name 课程名称,c.up_limit 上限人数
+    from teacher t join course c
+      on t.teacher_no = c.teacher_no;
+   -- 向教师表teacher中插入一行数据
+   insert into teacher values('005','魏老师','21000000000');
+  
+   3.3.3 外连接
+    1) 左外连接
+       左外连接的结果集 = 内连接的结果集 + 左表中匹配不上的数据
+       -- 语法
+       select 字段列表 
+         from 左表 left [outer] join 右表
+            on 连接条件;
+       -- 示例：列出学生及其所在班级的信息
+       select s.student_no 学号,s.student_name 姓名,
+          c.class_name 班级
+         from student s left join classes c
+           on s.class_no = c.class_no;
+
+    2) 右外连接
+       右外连接的结果集 = 内连接的结果集 + 右表中匹配不上的数据
+       -- 语法
+       select 字段列表 
+         from 左表 right [outer] join 右表
+            on 连接条件;
+       -- 示例：列出学生及其所在班级的信息
+       select s.student_no 学号,s.student_name 姓名,
+          c.class_name 班级
+         from student s right join classes c
+           on s.class_no = c.class_no;
+    3) 全外连接  -- 目前MySQL不支持
+      全外连接的结果集 = 内连接的结果集 + 两表中匹配不上的数据
+      -- 语法
+       select 字段列表 
+         from 左表 full [outer] join 右表
+            on 连接条件;
+   
+ -- 练习：列出教师及其所授课程的信息，包括教师工号、姓名、课程名称和人数
+ select t.teacher_no,t.teacher_name,c.course_name,c.up_limit
+   from teacher t left join course c
+      on t.teacher_no=c.teacher_no;
+
+ select t.teacher_no,t.teacher_name,c.course_name,c.up_limit
+   from course c right join teacher t
+      on t.teacher_no=c.teacher_no;  
+
+   3.3.4 三表内连接
+    -- 向选课表choose中插入如下数据:
+    ---------------------------------------------------------
+      student_no   course_no   score       choose_time
+    ---------------------------------------------------------
+      '2018001'       2         40      '2018-06-25 10:30:20'
+      '2018001'       1         50      '2018-06-30 15:23:40'
+      '2018002'       3         60      '2018-11-30 12:20:50'
+      '2018002'       2         70      '2018-07-01 09:10:20'
+      '2018003'       1         80      '2018-12-22 14:20:45'
+      '2018004'       2         90      '2018-12-25 10:09:22'
+      '2018005'       3        null     '2019-06-26 13:40:20'
+      '2018005'       1        null     '2019-06-30 16:29:10'
+    ---------------------------------------------------------
+    SQL语句如下：
+    insert into choose
+     values(null,'2018001',2,40,'2018-06-25 10:30:20');
+    insert into choose
+     values(null,'2018001',1,50,'2018-06-30 15:23:40');
+    insert into choose
+     values(null,'2018002',3,60,'2018-11-30 12:20:50');
+    insert into choose
+     values(null,'2018002',2,70,'2018-07-01 09:10:20');
+    insert into choose
+     values(null,'2018003',1,80,'2018-12-22 14:20:45');
+    insert into choose
+     values(null,'2018004',2,90,'2018-12-25 10:09:22');
+    insert into choose
+     values(null,'2018005',3,null,'2019-06-26 13:40:20');
+    insert into choose
+     values(null,'2018005',1,null,'2019-06-30 16:29:10');
+   
+    -- 语法
+    select 字段列表
+     from 表1 join 表2 on 连接条件1
+       join 表3 on 连接条件2;
+    -- 示例:列出学号及其选修课程的信息，包括学号、姓名、课程名称和成绩
+    学号、姓名:	student
+    课程名称:	course
+    成绩:	choose
+    连接条件：student.student_no = choose.student_no
+             course.course_no = choose.course_no
+    
+   select s.student_no 学号,s.student_name 姓名,
+      c.course_name 课程名称,ch.score 成绩
+    from student s join choose ch on s.student_no=ch.student_no
+         join course c on c.course_no=ch.course_no;
+   
+ 3.4 where 子句
+  3.4.1 作用
+   根据条件筛选符合条件的数据行
+  3.4.2 语法
+   select ... from ...
+     where 条件表达式;
+  3.4.3 比较运算符
+   >   <   >=   <=   =    !=(<>)
+   -- 示例
+   1) 列出'张三'的成绩信息
+    select s.student_no,s.student_name,c.score
+     from student s join choose c
+        on s.student_no=c.student_no
+          where s.student_name='张三';
+   2) 列出考试成绩不及格的信息
+     select student_no,course_no,score from choose
+       where score<60;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

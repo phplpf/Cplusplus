@@ -1,0 +1,456 @@
+1.where子句
+ 1.1 作用
+   根据条件筛选数据行.符合条件的数据行被筛选出来,不符合条件的被过滤掉
+ 1.2 语法
+  where 条件表达式
+ 1.3 比较运算符
+  >  <  >=  <=  =  !=(<>)
+  -- 示例
+  select s.student_no,s.student_name,c.score
+    from student s join choose c 
+      on s.student_no=c.student_no
+        where s.student_name='张三';
+  -- 使用where子句实现内连接
+  1) 语法
+   select 字段列表
+    from 表1,表2
+      where 连接条件;
+  2) 示例
+   select s.student_no,s.student_name,c.class_name
+     from student s,classes c
+       where s.class_no=c.class_no;
+
+ 1.4 SQL提供的运算符
+  1.4.1 between..and
+   1) 作用
+     判断字段或表达式的值是否处于给定的闭区间
+   2) 语法
+     字段或表达式 between 值1 and 值2
+   3) 示例
+     -- 列出成绩在[60,90]之间的信息
+     select student_no,course_no,score from choose
+       where score between 60 and 90;
+     -- 列出选课时间为2018年的
+     select student_no,course_no,choose_time from choose
+       where choose_time between '2018-01-01 00:00:00' and
+          '2018-12-31 23:59:59';
+   
+   1.4.2 in
+    1) 作用
+     判断字段或表达式是否在给定的列表中
+    2) 语法
+      字段或表达式 in(值1,值2,...);
+    3) 示例
+     -- 列出class_no为1,2的学生的信息
+     select * from student
+      where class_no in(1,2);
+     -- 列出选修'C语言'和'MySQL'的信息,包括学号、课程名称、成绩
+     select ch.student_no 学号,c.course_name 课程,ch.score 成绩
+       from choose ch join course c
+         on ch.course_no=c.course_no
+           where c.course_name in('C语言','MySQL');
+
+  1.4.3 like  -- 模糊查询
+   1) 作用
+     判断字段或表达式是否符合给定的模式
+   2) 语法
+     字段或表达式 like '模式'
+   3) 通配符
+    %   匹配任意长度的任意字符
+    _   匹配一位任意字符
+    比如，检索名字中包含'龙'的学生的信息
+      stu_name like '%龙%'
+   4) 示例
+    -- 检索information_schema.tables中，表名包含'user'的
+    select table_schema,table_name
+       from information_schema.tables
+          where table_name like '%user%';
+    -- 检索information_schema.tables中，表名以'user'开头的
+    select table_schema,table_name
+       from information_schema.tables
+          where table_name like 'user%';
+    -- 检索information_schema.tables中，表名以'user_'开头的
+    当要匹配的模式中包含通配符时，需要转义
+    a. 使用 \
+    select table_schema,table_name
+       from information_schema.tables
+          where table_name like 'user\_%';
+    b. 使用escape指定转义字符
+    select table_schema,table_name
+       from information_schema.tables
+          where table_name like 'user#_%' escape '#';
+  
+  1.4.4 is null
+    1) 作用
+     判断字段或表达式是否为null
+    2) 语法
+     字段或表达式 is null
+    3) 示例
+     -- 列出没有班级的学生的信息
+     select * from student where class_no is null;
+     -- 思考：列出没有学生的班级的信息
+     select c.*
+       from classes c left join student s
+         on c.class_no=s.class_no
+           where s.student_no is null;
+ 
+ 1.5 逻辑运算符
+  and   or   not(!)
+  1.5.1 and
+   -- 示例
+   1) 列出'张三'的成绩的信息
+    select s.student_no 学号,s.student_name 姓名,c.score 成绩
+      from student s,choose c
+        where s.student_no=c.student_no
+           and s.student_name='张三';
+   2) 列出成绩在[60,90]之间的信息
+    select * from choose
+      where score>=60 and score<=90;
+   3) 使用where子句实现三表内连接
+    -- 语法
+    select 字段列表
+     from 表1,表2,表3
+       where 连接条件1 and 连接条件2;
+    -- 列出学生及其选课的信息，显示学号、姓名、课程名称和成绩
+    select s.student_no 学号,s.student_name 姓名,
+     c.course_name 课程,ch.score 成绩
+      from student s,choose ch,course c
+        where s.student_no=ch.student_no
+          and ch.course_no=c.course_no;
+
+  1.5.2 or
+   -- 列出'2018自动化1班'和'2018自动化2班'的学生的信息
+   select s.student_no,s.student_name,c.class_name
+     from student s,classes c
+       where s.class_no=c.class_no
+         and (c.class_name='2018自动化1班' or c.class_name='2018自动化2班');
+
+  1.5.3 not(!)
+   
+    select * from choose where score<60;
+    
+    select * from choose where score>=60;
+    select * from choose where !(score<60);
+    select * from choose where not(score<60);
+
+    运算符取反：
+    <                 >=
+    >                 <=
+    =                 !=
+
+    between..and      not between..and
+    in                not in(注意NULL)
+    like              not like
+    is null           is not null
+  
+ c_no in(1,2,null)     <==> c_no=1 or c_no=2 or c_no=null
+                       <==> c_no=1 or c_no=2
+ c_no not in(1,2,null) <==> not(c_no=1 or c_no=2 or c_no=null)
+                       <==> c_no!=1 and c_no!=2 and c_no!=null
+                       <==> null
+
+   -- 列出有学生的班级
+   select distinct c.*
+    from classes c left join student s
+      on c.class_no=s.class_no
+        where s.student_no is not null;
+    
+2.order by子句
+ 2.1 作用
+  对结果集进行排序
+ 2.2 语法
+  order by 排序字段 [排序方式][,排序字段 [排序方式],...]
+  其中：
+    排序字段：  用于排序的字段或表达式
+    排序方式：  两种
+        asc   升序  缺省
+        desc  降序 
+ 2.3 示例
+  -- 按照成绩进行降序排序，显示学号、课程编号和成绩
+  select student_no,course_no,score from choose
+    order by score desc;
+  -- 按照选课时间排序，列出学号、课程编号和选课时间
+  select student_no,course_no,choose_time from choose
+    order by choose_time;
+  -- 排序时NULL默认按照最小值处理   
+  select student_no,course_no,score from choose
+    order by score;
+  -- 多列排序
+  select student_no,student_name,class_no from student
+    order by class_no asc,student_no desc;
+ 
+3.组函数(聚合函数)
+ 作用：对一组数据进行汇总统计，返回一个统计结果
+ 3.1 常用的组函数
+  count:   统计一组数据的个数
+            参数可以是任意类型  并且可以使用*
+  max：    统计一组数据的最大值
+  min：    统计一组数据的最小值
+            参数可以是数值、字符串、日期时间等
+  sum：    统计一组数据的累加和
+  avg：    统计一组数的平均值
+            参数要求是数值类型
+  -- 统计不及格的数量
+  select count(score) from choose where score<60;
+  -- 统计学生人数
+  select count(*) from student;
+  -- 统计选课时间最早、最晚的
+  select min(choose_time),max(choose_time) from choose;
+  -- 统计总分、平均分
+  select sum(score),avg(score) from choose;
+ 3.2 组函数对NULL的处理 -- 忽略
+  select count(*),count(score) from choose;
+ 3.3 组函数可以进行排重汇总(参数使用distinct修饰)
+  select count(*),count(class_no),count(distinct class_no)
+     from student;
+
+4. 分组子句
+ 4.1 作用
+  将查询按照一个或多个字段进行分组并汇总
+ 4.2 语法
+  group by 字段列表
+ 4.3 示例
+  -- 统计每个班级的人数
+  select class_no,count(*) from student
+    group by class_no;
+  -- MySQL的分组语句中，select子句中的字段列表只能使用分组字段、依赖于分组字段的字段和组函数
+  select s.class_no,c.class_name,count(s.student_no)
+    from classes c,student s where c.class_no=s.class_no
+      group by s.class_no;
+  -- 多列分组
+  select s.class_no,c.class_name,count(s.student_no)
+    from classes c,student s where c.class_no=s.class_no
+      group by s.class_no,c.class_name;
+  -- 统计每个数据库表(视图)的数量
+  select table_schema 数据库,count(table_name) 数量
+   from information_schema.tables
+     group by table_schema;
+
+  -- 统计每个数据库表(视图)的数量,列出表的数量大于50的数据库
+  select table_schema 数据库,count(table_name) 数量
+   from information_schema.tables
+     -- where count(table_name)>50 错误 where子句中不允许使用组函数
+     -- where 数量>50 错误 where子句不能使用字段或表达式的别名
+     group by table_schema;
+
+  4.4 having子句
+   -- 作用
+    在分组语句中，根据条件筛选符合条件的组
+   -- 语法
+    having 条件表达式
+   -- 示例
+   select table_schema 数据库,count(table_name) 数量
+    from information_schema.tables
+     where 1=1
+      group by 数据库
+       -- having count(table_name)>50;
+       having 数量>50
+         order by 数量;
+
+   语法顺序：
+    select
+      from
+        where
+          group by
+            having
+              order by
+   执行顺序：
+    from
+     where
+      select 
+       group by
+         having
+          order by
+
+5. 子查询
+ 5.1 概念
+  如果一条select语句嵌入到另一条SQL语句(insert、update、delete、select等)中，那么嵌入的select语句称为子查询，包含子查询的SQL语句称为主查询.
+  为了标记子查询和主查询之间的关系，通常将子查询放到小括号中
+  执行时，先执行子查询，再执行主查询(从内向外执行)
+ 5.2 where自己中的子查询
+  5.2.1 子查询返回单值
+   条件表达式中可以使用比较运算符
+   -- 列出'张三'的成绩
+   1) 查询'张三'的学号
+    select student_no from student where student_name='张三';
+    -- 2018001
+   2) 根据学号查询成绩
+    select student_no,course_no,score from choose
+      where student_no='2018001';
+   3) 合并
+    select student_no,course_no,score from choose
+      where student_no=(select student_no from student where student_name='张三');
+
+  5.2.2 子查询返回多值
+   条件表达式可以使用in、not in等运算符
+   -- 列出没有开设选修课的教师信息
+   select teacher_no from course;
+   -- 001,002,003,004
+   select * from teacher where teacher_no not in(select teacher_no from course);
+   -- 列出没有学生的班级的信息
+   select * from classes where class_no not in(select distinct class_no from student where class_no is not null);
+
+ 5.3 select子句使用子查询
+  代替外连接
+  -- 查询学生及其所在班级信息，列出学号、姓名和班级名称
+  select student_no,student_name,(select class_name from classes c where c.class_no=s.class_no) class_name
+    from student s;
+
+ 5.4 from子句中使用子查询
+  每个select语句可以看成一个虚拟的内存表，可以在结果集的基础上进行进一步的查询。
+  -- 列出成绩高于平均分的信息
+  select * from choose
+      where score>(select avg(score) from choose);
+  -- 列出成绩高于自己的平均分的信息
+  select c.student_no,c.course_no,c.score,a.a_score
+   from choose c,
+  (select student_no stu_no,avg(score) a_score from choose
+    group by student_no) a
+      where c.student_no=a.stu_no
+        and c.score>a.a_score;
+
+6. 索引 index
+ 6.1 作用
+  提高查询效率
+ 6.2 索引和约束
+  系统会自动为主键、唯一和外键字段创建索引
+ 6.3 创建索引
+  6.3.1 创建表的同时创建索引
+   -- 语法
+   create table 表名(
+     字段 数据类型[ 约束条件],
+     ...
+     字段 数据类型[ 约束条件]
+     [,其它约束条件]
+     ...
+     [unique|fulltext] index [索引名](字段)
+   );
+   -- 示例
+   create table test(
+     id int primary key,
+     name char(10) not null,
+     index ix_name(name)
+   );
+  
+   6.3.2 在已有表上创建索引
+    -- 语法
+    create [unique|fulltext] index 索引名 on 表名(字段名);
+    -- 示例：在sut2的student_no字段添加索引
+    create index ix_stuno on stu2(student_no);
+
+  6.4 查看索引
+   -- 语法
+   show index from 表名\G
+   其中:
+     \G   表示纵向显示结果
+   -- 示例
+   show index from test\G
+
+  6.5 删除索引
+   -- 语法
+   drop index 索引名 on 表名;
+   -- 示例
+   drop index ix_stuno on stu2;
+
+7. 视图 view
+ 7.1 作用
+  1) 简化查询操作
+  2) 数据安全
+ 7.2 创建视图
+  -- 语法
+  create view 视图名[(视图字段列表)]
+  as
+     select语句;
+
+  -- 示例1
+  -- 复制student表中的数据到stu1中
+  insert into stu1 select * from student;
+  1) 创建视图
+  create view vw_stu(s_no,s_name,phone,c_no)
+  as
+    select * from stu1;
+  2) 测试
+   insert into vw_stu values('2018007','小宋','13512345678',1);
+   update vw_stu set c_no=1 where c_no is null;
+   delete from stu1 where student_no='2018007';
+   select * from vw_stu;
+
+  -- 示例2
+  -- 创建视图
+  create view vw_stu_classes(s_no,s_name,c_name)
+  as
+    select stu1.student_no,stu1.student_name,class1.class_name
+      from stu1,class1 where stu1.class_no=class1.class_no
+         and class_name like '%自动化%';
+  -- 测试
+  select * from vw_stu_classes;
+  #错误
+  insert into vw_stu_classes(s_no,s_name,c_name)
+       values('2018007','小宋','2018电子信息1班');
+  --正确
+  update vw_stu_classes set c_name='2018电子信息1班'
+      where c_name='2018自动化1班';
+  #错误
+  delete from vw_stu_classes where c_name='2018电子信息1班';
+
+ 7.3 查看视图
+  1) show tables;
+  2) desc 视图名;
+  3) select 字段列表 from information_schema.views
+       where table_schema='数据库名'\G
+ 7.4 删除视图
+  drop view 视图名;
+--------------------------------------------------------------
+练习：
+0. 复制choose表到choose1
+   复制student表到stu
+1. 删除choose1表中'张三'的数据
+2. 把'2018自动化1班'的学生的班级改为'2018自动化2班'
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ -- 创建测试表
+ create table t_index(
+    id int primary key auto_increment,
+    uid int not null,
+    name char(20)  not null
+ );
+ -- 创建存储过程
+ delimiter $$
+ create procedure insert_index(n int)
+ begin
+   declare i int default 1;
+   while i<=n do
+     insert into t_index values(null,i,concat('test',i));
+     set i=i+1;
+   end while;
+ end
+ $$
+ delimiter ;
+ -- 执行存储过程
+ call insert_index(5000000);
+    
+   
+
+
+
+
+
+
+
+
+
+

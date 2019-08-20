@@ -1,0 +1,387 @@
+
+
+更改字符集：
+1. sudo vi /etc/mysql/mysql.conf.d/mysqld.cnf
+ [mysqld]
+  ...
+  character-set-server = utf8
+  ...
+
+2. suod vi /etc/mysql/conf.d/mysql.cnf
+  [mysql]
+  default-character-set = utf8
+3.重启服务
+  service mysql restart
+
+  show variables like 'CHAR%';
+--------------------------------------------------------------
+张淑敏
+zhangsm@tedu.cn
+
+MySQL     6天
+ SQL
+ MySQL扩充
+ C语言中访问MySQL数据库
+
+Win32     7天
+
+--------------------------------------------------------------
+1. 数据库概述
+ 1.1 数据管理技术的发展
+  人工管理阶段： 20世纪50年代中期之前
+               
+  文件系统阶段:  20世纪50年代末～60年代中后期
+     缺点：数据冗余
+          数据不一致
+          数据联系弱
+  数据库阶段：  20世纪60年代末～至今
+     三大标志性事件：
+      1968年，IBM    层次性数据库管理系统 IMS
+      1969年，DBTG   发布了一系统报告  标准和规范
+      1970年，IBM的研究人员 E.F.Codd 论文，首次提出关系型数据库概念
+     特点：采用更为复杂的数据库模型
+          最低的冗余、数据完整性(数据的准确性)
+          数据库系统为用户提供方便的接口(SQL语言、应用程序)
+          数据库控制功能：
+            并发控制
+            数据库恢复
+            安全性
+          系统更为灵活
+          信息处理技术不再以程序为中心，而是以数据为中心
+  1.2 几个术语
+   数据(data): 数据库中存储的基本对象，包括文字、图形、声音、图像等
+   数据库(Database): 是长期存储在计算机内、有组织、可共享的大量数据的集合
+   数据库管理系统(DBMS):是位于操作系统和用户之间的一层数据库管理软件
+                      科学的组织和存储数据、高效的获取和维护数据
+  
+  1.3 主流的关系型数据库产品
+   用二维表保存数据的数据库，称为关系型数据库
+   商业型：
+   Oracle         Oracle(甲骨文)      
+   DB2            IBM
+   SQL Server     微软  
+   开源：
+   MySQL          Oracle
+                  
+  1.4 SQL语言
+   机器语言   汇编语言  高级语言  结构化语言
+   
+   SQL(Structured Query Language):结构化查询语言
+   SQL分为：
+    数据查询语句(DQL): select
+      用来查询所需要的数据，使用最广泛、语法最复杂
+    数据操作语句(DML): insert、delete、update
+      用来改变数据库表中的数据
+    数据定义语句(DDL): create、drop、alter
+      用来创建、删除、修改数据库对象
+    事务控制语句(TCL): commit、rollback、savepoint
+      用来维护数据库的数据一致性
+    数据控制语句(DCL): create user、grant、revoke
+      用来创建用户、执行权限的授予和回收等
+
+2.MySQL基础知识
+ 2.1 MySQL的特点
+  1) 性能高效
+  2) 跨平台支持
+  3) 简单易用
+  4) 开源
+  5) 支持多用户
+ 2.2 服务的启动和停止
+  1) 启动
+     service mysql start
+  2) 重启
+     service mysql restart
+  3) 停止
+     service mysql stop
+ 2.3 连接MySQL服务器
+  1) 语法
+   mysql [-h host] [-u username] [-p[pwd]] [dbname] [-P port]
+   其中：
+    host: 要连接的服务器的IP地址或主机名
+          如果连接本机：可以省略 或 localhost 或 127.0.0.1
+    username: 登录名
+    pwd:      密码
+    dbname:   数据库名
+    port:     端口号  默认 3306
+  2) 示例
+    mysql -u root -p
+    mysql -u root -ptarena
+    mysql -h localhost -u root -p sys -P 3306
+    mysql -h 192.168.60.128 -u root -p
+ 
+ 2.4 MySQL数据库管理
+  2.4.1 创建数据库
+   1) 语法
+    create database 数据库名;
+   2) 示例
+    -- 创建"选课系统"数据库
+    create database choose;
+  2.4.2 查看数据库
+   1) 显示所有数据库列表
+    show databases;
+   2) 显示数据库结构
+    show create database 数据库名;
+    -- 显示"choose"数据库的信息
+    show create database choose;
+  2.4.3 选择当前数据库
+    use 数据库名;
+    -- 将"choose"设置为当前数据库
+    use choose;
+  2.4.4 删除数据库
+    drop database 数据库名;
+    -- 删除数据库"choose"
+    drop databse choose;
+ 
+MySQL中的注释：
+单行注释:    #
+            --  (后面必须有一个空格)
+多行注释：   /*   */   
+        
+ 2.5 数据库表的管理
+  2.5.1 创建表
+   1) 语法
+     create table 表名(
+       字段名 数据类型,
+       字段名 数据类型,
+       ...
+       字段名 数据类型
+     );
+   2) 示例
+    -- 创建数据库
+    create database choose;
+    -- 选择当前数据库
+    use choose;
+    -- 创建表
+    create table student(
+      stu_no  int,
+      stu_name char(10)
+    );
+  2.5.2 查看表
+   1) 显示当前数据库中所有表
+    show tables;
+   2) 显示指定表的创建信息
+    show create table 表名;
+    -- 示例
+    show create table student;
+   3) 显示表结构
+    desc[ribe] 表名;
+    -- 示例
+    desc student;
+  2.5.3 删除表
+   drop table 表名;
+   -- 示例
+   drop table student;
+
+3. MySQL表结构的管理
+ 3.1 MySQL的数据类型
+  3.1.1 数值类型
+   1) 整数
+     tinyint        1字节
+     smallint       2字节
+     mediumint      3字节
+     int            4字节
+     bigint         8字节
+     如果使用无符号整数，在数据类型后加 unsigned
+     比如：  age tinyint unsigned
+   2) 小数
+     浮点数：
+        float       4字节
+        double      8字节
+     精确小数:
+        decimal(len,p)
+        其中：  len -- 有效数字的位数
+               p   -- 精度
+        比如：salary decimal(7,2)
+
+   3.1.2 字符串
+    char(n)        定长字符串        n最大255
+    varchar(n)     变长字符串        n的最大值和字符集有关
+   3.1.3 日期时间
+    date       3字节     'YYYY-MM-DD'
+    time       3字节     'HH:II:SS'
+    datetime   8字节     'YYYY-MM-DD HH:II:SS'
+
+ 3.2 创建表
+  3.2.1 语法
+   create table 表名(
+     字段名 数据类型[ 约束条件],
+     ...
+     字段名 数据类型[ 约束条件]
+     [,其它约束条件]
+   )[其它选项(引擎，默认的字符集等)];
+  3.2.2 约束的类型
+   约束就是对表中数据添加的限制
+   确保数据完整性(实体完整性、域完整性、引用完整性、自定义完整性)
+   1) 主键约束  primary key
+      非空、唯一
+      一个表中只能有一个主键
+   2) 唯一约束  unique
+      唯一(不允许重复)
+   3) 非空约束  not null
+      不允许为空
+   4) 默认约束  default
+   5) 检查约束  check(布尔表达式)  -- 目前MySQL不支持
+      age tinyint unsigned check(age>=18 and age<=60)
+   6) 外键约束  foreign key
+               references
+
+ 3.3 约束的实施
+  3.3.1 主键约束
+   -- 创建学生表，把学号设置为主键
+   create table student(
+     stu_no int primary key,
+     stu_name char(10)
+   );
+   -- 测试(以插入语句为例)
+   -- insert语句的语法
+   insert into 表名[(字段列表)] values(值列表);
+   insert into student values(1,'张三');
+   #错误 主键字段的值不允许重复
+   insert into student values(1,'张三');
+   #错误 主键字段的值不允许为null
+   insert into student values(null,'张三');
+   select * from student;
+   
+   #错误 一个表中只能有一个主键
+   create table exam(
+     exam_date date primary key,
+     classroom char(10) primary key,
+     course_name char(20)
+   );
+   -- 复合键(组合键)
+   create table exam(
+     exam_date date,
+     classroom char(10),
+     course_name char(20),
+     primary key(exam_date,classroom)
+   );
+   insert into exam values('2019-06-25','阶教一','高数');
+   insert into exam values('2019-06-25','阶教二','物理');
+   insert into exam values('2019-06-26','阶教一','英语');
+   insert into exam values('2019-06-25','阶教一','马哲');
+
+  3.3.2 唯一约束
+   -- 删除学生表
+   drop table student;
+   -- 创建学生表，身份证号设置为唯一
+   create table student(
+     stu_no int primary key,
+     stu_name char(10),
+     stu_id char(18) unique
+   );
+   -- 测试
+   insert into student values(1,'张三','12345');
+   #错误 唯一约束的字段的值不允许重复
+   insert into student values(2,'张三','12345');
+   --正确 唯一约束的字段允许为null，并且null值可以有多个
+   insert into student values(2,'张三',null);
+   insert into student values(3,'张三',null);
+
+  3.3.3 非空约束
+   -- 删除学生表
+   drop table student;
+   -- 创建学生表，将学生姓名设置为非空
+   create table student(
+     stu_no int primary key,
+     stu_name char(10) not null
+   );
+   -- 测试
+   insert into student values(1,null);
+
+   当在一个字段上添加多种约束，关键字的顺序任意
+   比如：
+     stu_id char(18) not null unique
+     或
+     stu_id char(18) unique not null
+
+  3.3.4 默认约束
+   -- 删除学生表
+   drop table student;
+   -- 创建学生表，将班级设置为默认'CSD1905'
+   create table student(
+     stu_no int primary key,
+     stu_name  char(10) not null,
+     class_name char(20) default 'CSD1905'
+   );
+   -- 使用默认值
+   insert into student values(1,'张三',default);
+   insert into student(stu_no,stu_name) values(2,'李四');
+   -- 不使用默认值
+   insert into student values(3,'王五','CSD1904');
+   insert into student values(4,'马六',null);
+
+  3.3.5 外键约束
+   外键约束用于定义表和表之间的关系
+   主表: 提供数据的表
+   从表: 外键所在的表
+    外键字段的值必须来自于主表中的对应字段或者为NULL
+   -- 语法
+   constraint 约束名 foreign key(外键字段) references 主表(字段)
+   -- 创建班级表
+   create table classes(
+      class_no int primary key,
+      class_name char(20) not null unique
+   );
+   -- 创建学生表
+   drop table student;
+   create table student(
+     stu_no int primary key,
+     stu_name char(10) not null,
+     c_no int,
+     constraint classes_student_fk foreign key(c_no)
+         references classes(class_no)
+   );
+   注意：如果在创建表时添加外键约束，先创建主表，再创建从表。
+        外键引用的主表中的字段必须是唯一性字段，一般为主键
+   
+   -- 测试
+   #错误 外键字段的值在主表对应字段不存在
+   insert into student values(1,'张三',1);
+   -- 正确 外键字段允许为NULL
+   insert into student values(2,'李四',null);
+   -- 向主表(classes)中插入测试数据
+   insert into classes values(1,'2018通信工程1班');
+   insert into classes values(2,'2018信管1班');
+   -- 正确
+   insert into student values(1,'张三',1);
+
+   -- 删除表时，先删除从表，再删除主表
+   drop table student;
+   drop table classes;
+  
+ 3.4 自增长字段
+  1) 语法
+    字段名 数据类型 auto_increment
+    数据类型必须是整型，并且必须设置为主键
+  2) 示例
+    -- 创建班级表，班级编号设置为自增长
+    create table classes(
+      class_no int primary key auto_increment,
+      class_name char(20) not null
+    ); 
+    -- 插入数据 
+    insert into classes values(null,'2018通信工程1班');
+    insert into classes(class_name) values('2018信管1班');
+   
+    
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
