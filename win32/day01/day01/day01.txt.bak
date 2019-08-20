@@ -1,0 +1,38 @@
+创建解决方案：
+1.文件 ---> 新建 ---> 项目
+2.在 已安装的模板 中，点击 其它项目类型-->
+  Visual Studio 解决方案 --> 空白解决方案
+3. 名称：填写 解决方案名称(Day01)
+   位置：点击 浏览 按钮，选择路径
+   点击 确定
+
+在解决方案中添加控制台项目：
+1. 右键解决方案名称 ---> 添加 ---> 新建项目
+2. 在 已安装的模板 中，点击 Visual C++ --> Win32
+   --> Win32控制台应用程序
+3. 名称：填写项目名称(WinConsole)
+   点击 确定 按钮
+4. 点击 下一步 按钮
+5. 勾选 空项目，点击 完成 按钮
+
+在项目中添加文件：
+1.右键项目名称--> 添加 ---> 新建项
+2.选择 c++文件，在名称后填写文件名(不用写扩展名)
+3.点击 添加
+
+默认安装时，CL.EXE和LINK.EXE的路径：
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin
+
+
+
+CL.EXE -c Hello.c                      // 生成 Hello.obj
+RC.EXE Hello.rc                        // 生成 Hello.res
+LINK.EXE Hello.obj Hello.res user32.lib // 生成 Hello.exe
+Hello.exe
+完整的编译、链接的过程：
+         CL.EXE
+.c/.cpp ---------> .obj | LINK.EXE
+        RC.EXE          |-----------> .exe
+.rc   -----------> .res |
+
+
