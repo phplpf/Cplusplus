@@ -1,0 +1,46 @@
+练习：使用键盘上的方向键控制字符串在窗口的客户区移动
+涉及的消息：
+  WM_PAINT
+  WM_KEYDOWN
+  
+涉及的函数:
+  InvalidateRect
+  
+  
+// 假设 按下 A
+TranslateMessage( &nMsg )
+{
+   if(nMsg.message != WM_KEYDOWN )
+     return ...;
+   根据nMsg.wParam的值(虚拟键值),可以知道哪个按键被按下
+   if(是否是可见字符键){
+      判断CapsLock键的状态
+      if(打开)
+        PostMessage(nMsg.hwnd,WM_CHAR,0X41,...);// A
+      else
+        PostMessage(nMsg.hwnd,WM_CHAR,0X61,...);// a
+   }
+   else{
+   	return ...;
+   }
+}
+
+练习： 使用鼠标控制字符串在窗口客户区移动
+WM_MOUSEMOVE
+
+// 定时器处理函数
+VOID CALLBACK TimerProc(
+  __in  HWND hwnd,		// 窗口句柄
+  __in  UINT uMsg,		// 消息ID 只能是WM_TIMER
+  __in  UINT_PTR idEvent,// 定时器ID
+  __in  DWORD dwTime		// 当前计算机系统时间
+);
+
+
+练习：实现小球在窗口客户区弹跳
+涉及的消息：
+  WM_PAINT
+  WM_TIMER
+涉及的函数：
+  Ellipse
+  GetClientRect

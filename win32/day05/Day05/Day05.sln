@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "WinDraw", "WinDraw\WinDraw.vcxproj", "{2A741F5E-BE0B-4266-876A-7B81250C3E18}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "WinText", "WinText\WinText.vcxproj", "{08581C5D-A030-405A-9BFB-348B18376146}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{2A741F5E-BE0B-4266-876A-7B81250C3E18}.Debug|Win32.ActiveCfg = Debug|Win32
+		{2A741F5E-BE0B-4266-876A-7B81250C3E18}.Debug|Win32.Build.0 = Debug|Win32
+		{2A741F5E-BE0B-4266-876A-7B81250C3E18}.Release|Win32.ActiveCfg = Release|Win32
+		{2A741F5E-BE0B-4266-876A-7B81250C3E18}.Release|Win32.Build.0 = Release|Win32
+		{08581C5D-A030-405A-9BFB-348B18376146}.Debug|Win32.ActiveCfg = Debug|Win32
+		{08581C5D-A030-405A-9BFB-348B18376146}.Debug|Win32.Build.0 = Debug|Win32
+		{08581C5D-A030-405A-9BFB-348B18376146}.Release|Win32.ActiveCfg = Release|Win32
+		{08581C5D-A030-405A-9BFB-348B18376146}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

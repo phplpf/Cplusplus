@@ -1,0 +1,41 @@
+// 移动窗口
+BOOL MoveWindow(
+  __in  HWND hWnd,       // 窗口句柄
+  __in  int X,                      // 窗口左上角x坐标
+  __in  int Y,                      // 窗口左上角y坐标
+  __in  int nWidth,           // 宽
+  __in  int nHeight,          // 高
+  __in  BOOL bRepaint    // 是否重绘 一般赋值TRUE
+);
+
+ShowWindow( hWnd, SW_SHOW )
+{
+     hWnd --> 保存窗口数据的内存 
+      --> 根据内存中保存的窗口数据，在显示器上绘制窗口图像
+}
+
+
+处理消息的三个方面：
+1. 消息产生的时间（时机）
+2. 消息的一般用法
+3. 消息的两个附加数据(wParam，lParam)
+
+
+  long a = 0x45454646;
+                 0100 0101 0100 0101 0100 0110 0100 0110
+  a & 0x 0000FFFF               取出低字
+  (a >> 16) & 0x0000FFFF  取出高字
+  
+练习：实现编辑框自适应窗口客户区大小的变化
+
+
+
+
+
+
+
+
+
+
+
+

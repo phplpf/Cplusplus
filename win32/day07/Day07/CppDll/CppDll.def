@@ -1,0 +1,5 @@
+LIBRARY CppDll
+EXPORTS
+    CppDll_sub  @1
+	CppDll_add  @2
+	

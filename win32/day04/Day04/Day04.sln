@@ -1,0 +1,32 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "WinMenu", "WinMenu\WinMenu.vcxproj", "{DA632419-1EBF-470E-A248-3C2D673ABE38}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "WinRes", "WinRes\WinRes.vcxproj", "{2F45BBD0-D27E-4B45-A4CB-175F497C20CD}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "WinDraw", "WinDraw\WinDraw.vcxproj", "{D9FCA513-20C9-4D9D-9306-E19012D6151B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{DA632419-1EBF-470E-A248-3C2D673ABE38}.Debug|Win32.ActiveCfg = Debug|Win32
+		{DA632419-1EBF-470E-A248-3C2D673ABE38}.Debug|Win32.Build.0 = Debug|Win32
+		{DA632419-1EBF-470E-A248-3C2D673ABE38}.Release|Win32.ActiveCfg = Release|Win32
+		{DA632419-1EBF-470E-A248-3C2D673ABE38}.Release|Win32.Build.0 = Release|Win32
+		{2F45BBD0-D27E-4B45-A4CB-175F497C20CD}.Debug|Win32.ActiveCfg = Debug|Win32
+		{2F45BBD0-D27E-4B45-A4CB-175F497C20CD}.Debug|Win32.Build.0 = Debug|Win32
+		{2F45BBD0-D27E-4B45-A4CB-175F497C20CD}.Release|Win32.ActiveCfg = Release|Win32
+		{2F45BBD0-D27E-4B45-A4CB-175F497C20CD}.Release|Win32.Build.0 = Release|Win32
+		{D9FCA513-20C9-4D9D-9306-E19012D6151B}.Debug|Win32.ActiveCfg = Debug|Win32
+		{D9FCA513-20C9-4D9D-9306-E19012D6151B}.Debug|Win32.Build.0 = Debug|Win32
+		{D9FCA513-20C9-4D9D-9306-E19012D6151B}.Release|Win32.ActiveCfg = Release|Win32
+		{D9FCA513-20C9-4D9D-9306-E19012D6151B}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

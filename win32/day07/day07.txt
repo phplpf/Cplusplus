@@ -1,0 +1,39 @@
+创建动态库 -- 两种导出方式
+1. 声明导出
+ 在函数前加 _declspec(dllexport)
+ 对于C++,导出的是换名后的对应的相对地址
+2. 模块定义文件导出
+ 在动态库中添加.def文件
+ LIBRARY 动态库名
+ EXPORTS
+    函数名  编号
+    ...
+ C++中，导出的可以是不做换名的函数对应的相对地址，
+        也可以是换名后的函数对应的相对地址
+ 
+使用动态库  -- 两种链接方式
+1. 隐式链接
+ 动态库的加载、函数绝对地址的获取和动态库的卸载由操作系统完成
+2. 显式链接
+ 在调用库中的函数前，由程序员调用LoadLibrary加载动态库
+ 由程序员调用GetProcAddress函数获取函数的绝对地址
+ 函数使用完后，由程序员调用FreeLibray卸载动态库
+
+// 等候指定的可等候句柄有信号
+DWORD WINAPI WaitForSingleObject(
+  __in  HANDLE hHandle,         // 等候的句柄
+  __in  DWORD dwMilliseconds    // 等候时间     INFINITE
+);
+
+g_nValue++;
+001313F9  mov         eax,dword ptr [g_nValue (137138h)]  
+001313FE  add         eax,1  
+00131401  mov         dword ptr [g_nValue (137138h)],eax  
+简化成：
+mov         eax,g_nValue  
+add         eax,1  
+mov         g_nValue,eax 
+
+eax = g_nValue;
+eax = eax + 1;
+g_nValue = eax;
