@@ -1,0 +1,155 @@
+一 MFC视图
+   1 相关类
+   CView类-继承自CWnd类。视图的功能主要是用来显式数据。包含了纯虚函数
+           OnDraw()，所以是一个抽象类。
+   2 CView类的使用 
+     2.1 CWnd::PostNcDestroy()-该函数会在窗口销毁后被默认调用。用户
+     通常在子类中重写该函数，完成用户的资源释放。例如:delete this;  
+     
+     void CView::PostNcDestroy()
+     {
+	     delete this;//视图对象的自销毁
+     }
+     void CFrameWnd::PostNcDestroy()
+     {
+		  delete this;//框架对象的自销毁
+     }   
+     处理方式：
+     方法1: 重写CView::PostNcDestroy(),在函数中不写代码.
+            对于视图的处理，既没有new，也没有delete。
+     方法2: 在框架窗口中，定义视图类型的指针 CMyView m_pwndView;
+            然后再OnCreate()中，m_pwndView=new CMyView。最后调用
+            m_pwndView->Create(...)函数，创建窗口。
+            对于视图的处理，new和delete是成对出现的。
+     2.2 视图窗口自适应框架窗口大小
+     处理方式：
+     方法1：处理框架窗口WM_SIZE消息，在消息处理函数中，调用视图的
+            MoveWindow()函数，调整大小。
+     方法2:将视图窗口的ID设置为AFX_IDW_PANE_FIRST
+     2.3 对命令消息的处理
+     2.3.1 设置活动视图
+           方式1：CFrameWnd::SetActiveView(m_pWndView);
+           方式2: m_pViewActive = m_pWndView;   
+     2.3.2 对命令消息的默认处理顺序问题(10分钟)
+           View->Frame->App   （CFrameWnd:: OnCmdMsg ）
+     2.4 OnDraw()和OnPaint()函数的关系？
+         CView::OnPaint()->CMyView::OnDraw()
+         CMyView::OnPaint()                            
+         两者都是用来显示数据的，但是OnDraw()更简单，优先使用OnDraw。
+   3 View、Frame和App之间的关系？
+     CWinApp
+       |->m_pMainWnd (CFrameWnd)
+             |->m_pViewActive  (CView)
+二 运行时类信息
+   1 概念
+     程序在运行的时候，获取对象的类信息以及判断是否属于某个类。
+     class CDog：public CAnimal：public CObject
+     main()
+     {
+        CDog dog;
+        1 获取dog对象的类信息 "CDog"、大小、版本等信息。
+        2 dog is a CDog? TRUE;
+          dog is a CAnimal?TRUE;
+          dog is a CObject?TRUE;
+          dog is a CWnd? FALSE 
+     }
+   2 条件
+     2.1 直接或者间接的派生自CObject类
+     2.2 在类的定义中添加运行时类信息的声明宏
+         DECLARE_DYNAMIC(theClass)
+         在类的实现中添加运行时类信息的实现宏
+         IMPLEMENT_DYNAMIC(theClass,baseClass)
+   3 相关函数
+     3.1 获取对象的类信息，类信息封装在CRumtimeClass结构体中。
+         CRuntimeClass* GetRuntimeClass( ) 
+         struct CRuntimeClass
+         {
+           LPCSTR m_lpszClassName //类的名称字符串
+           int m_nObjectSize //对象大小也可以叫类大小
+           UINT m_wSchema //类的版本
+           CObject* ( PASCAL* m_pfnCreateObject )( )//创建对象的函数的指针
+           
+           CRuntimeClass* m_pBaseClass//保存下一个节点(在父类中)的指针
+         }
+         CRuntimeClass 的成员函数：
+         CObject* CreateObject( );-创建对象。
+     3.2 判断对象是否属于某个类,传入的参数是这个类的运行时类信息。
+         通常通过一个宏RUNTIME_CLASS(类)来获取某个类的运行时类信息。
+         BOOL IsKindOf( const CRuntimeClass* pClass ) const;    
+  4 原理
+    4.1 宏替换
+        ......
+    4.2 成员的作用
+        classCDog-静态的结构体常量。类型是CRuntimeClass。保存了当前
+        类的名称、大小和版本等信息，另外还保存了下一个节点(在父类)的地址。
+        GetRuntimeClass()-虚函数，返回classCDog的地址。
+    4.3 成员之间的关系
+        GetRuntimeClass()
+          ->&classCDog
+                |->CDog类的类名、大小和版本。
+                |->&classCAnimal
+                      |->CAnimal类的类名、大小和版本。
+                      |->&classCObject
+                           |->CObject类的类名、大小和版本。
+                           |->NULL                 
+        形成了一个继承层次关系上的类的信息链。
+    4.4 IsKindOf函数的执行过程
+        // 参数是 &classCWnd 
+        if (dog.IsKindOf(RUNTIME_CLASS(CWnd)))
+        { 
+            //pClassThis保存的是&classCDog 
+            CRuntimeClass* pClassThis = GetRuntimeClass(); 
+            // pClass保存的是&classCWnd
+            return pClassThis->IsDerivedFrom(pClass);
+            {
+               // pClassThis保存的是&classCDog  
+               const CRuntimeClass* pClassThis = this;
+               while (pClassThis != NULL)
+               {
+                  //pBaseClass保存的是&classCWnd
+                  if (pClassThis == pBaseClass)
+			            return TRUE;
+			         // pClassThis保存的是当前类的父类的变量地址   
+			         pClassThis = pClassThis->m_pBaseClass;   
+               }
+               return FALSE;  
+            }
+        }    
+        
+三 动态创建
+   1 概念
+     根据参数的不同，使用统一的函数创建不同类的对象。
+   2 条件
+     2.1 直接或者间接的继承自CObject类。
+     2.2 在类的定义中添加的是动态创建的声明宏
+         DECLARE_DYNCREATE(theClass)
+         在类的实现中添加的是动态创建的实现宏
+         IMPLEMENT_DYNCREATE(theClass,baseClass)
+   3 使用
+   4 实现原理
+     4.1 宏替换
+         .....
+         在运行时类信息的基础上，多了一个CreateObject函数。
+     4.2 成员的作用
+         4.2.1 CDog::CreateObject()-new 对象。
+         4.2.2 classCDog-在该结构体常量的成员 m_pfnCreateObject 
+               中保存了CDog::CreateObject()函数地址。
+     4.3 实现过程
+         CObject* CreateInstance(CRuntimeClass* pClass)
+         {
+	        // pClass=>classCDog,类型是 CRuntimeClass
+	        // CRuntimeClass::CreateObject()函数
+	        return pClass->CreateObject();
+	        {
+	           // m_pfnCreateObject=>CDog::CreateObject()函数
+	           pObject = (*m_pfnCreateObject)();
+	           {
+	              
+	           }
+	        }
+         }                        
+         
+                  
+      
+                  
+                                   

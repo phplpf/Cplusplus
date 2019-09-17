@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MFCMenu", "MFCMenu\MFCMenu.vcxproj", "{D4A96D7B-5CA7-4E88-A15D-02E9778BE18E}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MFCBar", "MFCBar\MFCBar.vcxproj", "{F618B14E-6901-4AAD-A038-A3AD4F0C7EE0}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D4A96D7B-5CA7-4E88-A15D-02E9778BE18E}.Debug|Win32.ActiveCfg = Debug|Win32
+		{D4A96D7B-5CA7-4E88-A15D-02E9778BE18E}.Debug|Win32.Build.0 = Debug|Win32
+		{D4A96D7B-5CA7-4E88-A15D-02E9778BE18E}.Release|Win32.ActiveCfg = Release|Win32
+		{D4A96D7B-5CA7-4E88-A15D-02E9778BE18E}.Release|Win32.Build.0 = Release|Win32
+		{F618B14E-6901-4AAD-A038-A3AD4F0C7EE0}.Debug|Win32.ActiveCfg = Debug|Win32
+		{F618B14E-6901-4AAD-A038-A3AD4F0C7EE0}.Debug|Win32.Build.0 = Debug|Win32
+		{F618B14E-6901-4AAD-A038-A3AD4F0C7EE0}.Release|Win32.ActiveCfg = Release|Win32
+		{F618B14E-6901-4AAD-A038-A3AD4F0C7EE0}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

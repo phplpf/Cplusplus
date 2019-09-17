@@ -1,0 +1,56 @@
+一 滑块、进度条和旋转按钮
+   1、滑块的控件类是CSliderCtrl类
+   2、进度条的控件类是CProgressCtrl类
+   3、旋转按钮的控件类是CSpinButtonCtrl类
+二 列表控件
+   1 相关类
+     CListCtrl类-父类是CWnd类，控件类。提供了对列表控件的操作。
+     CListView类-父类是CCtrlView类，视图类。通过调用GetListCtrl
+              函数获取与之关联的的列表控件。
+   2 CListCtrl类的使用
+     有四种显示方式，分别是：图标、小图标、列表和报表。
+     图标大小也有两种，分别是32*32、16*16.
+     2.1 创建控件的图标列表
+         2.1.1 添加位图资源，设计图标(多个)。
+         2.1.2 在对话框类中添加图标列表对象
+               CImageList m_ilNormal;
+               CImageList m_ilSmall;
+         2.1.3 根据位图资源，创建图标列表
+               CImageList::Create
+               BOOL Create( 
+                UINT nBitmapID,//位图资源ID  
+                int cx, //每一个图标的宽度
+                int nGrow, //自动增长值
+                COLORREF crMask//遮挡色(这种颜色在图标中不显式)
+              ); 
+         2.1.4 将图标列表设置到控件
+               CListCtrl::SetImageList
+     2.2 添加控件的列
+         CListCtrl::InsertColumn
+     2.3 添加选项
+         CListCtrl::InsertItem
+     ......
+三 树控件
+   1 相关类
+     CTreeCtrl类-父类是CWnd类，是一个控件。
+     CTreeView类-父类是CCtrlView类，是一个视图。通过调用GetTreeCtrl
+               可以获取与视图关联的控件。
+   2 CTreeCtrl类的使用
+                                         
+     CTreeCtrl::InsertItem - 插入树节点
+     HTREEITEM InsertItem( 
+       LPCTSTR lpszItem, //节点名称
+       int nImage, //节点图标
+       int nSelectedImage,//节点被选中时的图标 
+       HTREEITEM hParent = TVI_ROOT,//默认值，插入的节点是根节点；插入的节点是非根节点，该参数是要插入节点的父节点。 
+       HTREEITEM hInsertAfter = TVI_LAST//默认值，表示在最后添加节点；在参数指定的节点后添加节点。
+     );               
+四 属性页控件(Tab控件)
+   1 相关类
+     CTabCtrl类-继承自CWnd类，是一个控件类。
+   2 CTabCtrl类的使用。
+   
+   
+                         
+    
+                        

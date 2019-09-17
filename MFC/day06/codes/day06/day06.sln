@@ -1,0 +1,32 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MFCSplit", "MFCSplit\MFCSplit.vcxproj", "{DCEB0747-76A2-4CAB-A75C-BA7E8DF76C98}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MFCDoc", "MFCDoc\MFCDoc.vcxproj", "{ADB1F918-47E3-4C6C-8896-E2E8DCF7D1C7}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Sdi", "Sdi\Sdi.vcxproj", "{73CBE41A-B65C-4104-9A30-27E54AF068DE}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{DCEB0747-76A2-4CAB-A75C-BA7E8DF76C98}.Debug|Win32.ActiveCfg = Debug|Win32
+		{DCEB0747-76A2-4CAB-A75C-BA7E8DF76C98}.Debug|Win32.Build.0 = Debug|Win32
+		{DCEB0747-76A2-4CAB-A75C-BA7E8DF76C98}.Release|Win32.ActiveCfg = Release|Win32
+		{DCEB0747-76A2-4CAB-A75C-BA7E8DF76C98}.Release|Win32.Build.0 = Release|Win32
+		{ADB1F918-47E3-4C6C-8896-E2E8DCF7D1C7}.Debug|Win32.ActiveCfg = Debug|Win32
+		{ADB1F918-47E3-4C6C-8896-E2E8DCF7D1C7}.Debug|Win32.Build.0 = Debug|Win32
+		{ADB1F918-47E3-4C6C-8896-E2E8DCF7D1C7}.Release|Win32.ActiveCfg = Release|Win32
+		{ADB1F918-47E3-4C6C-8896-E2E8DCF7D1C7}.Release|Win32.Build.0 = Release|Win32
+		{73CBE41A-B65C-4104-9A30-27E54AF068DE}.Debug|Win32.ActiveCfg = Debug|Win32
+		{73CBE41A-B65C-4104-9A30-27E54AF068DE}.Debug|Win32.Build.0 = Debug|Win32
+		{73CBE41A-B65C-4104-9A30-27E54AF068DE}.Release|Win32.ActiveCfg = Release|Win32
+		{73CBE41A-B65C-4104-9A30-27E54AF068DE}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

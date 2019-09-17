@@ -1,0 +1,32 @@
+一 MFC的第二部分 windows平台的数据库访问技术
+   1 ODBC-Open Database Connectivity，微软开放式数据互联。本质上是
+          一组用于访问和操作数据库的API，而且使用这一组API可以访问
+          不同的(关系型数据库)数据库产品。MFC将这组API进行了封装，
+          形成ODBC类。在使用前，首先需要将访问的数据库，设置为ODBC
+          数据源。
+          
+   2 ADO
+   
+二 ODBC类的使用
+   1 设置ODBC数据源
+     32位
+     控制面板\管理工具\数据源ODBC
+     64位
+     C:\Windows\SysWOW64\odbcad32.exe
+   2 相关类
+     CDatabase类-主要提供连接和关闭数据库功能。
+     CRecordset类-主要提供对数据的操作。
+     #include <afxdb.h>
+   3 ODBC类的使用步骤
+     3.1 打开数据库
+         CDatabase::Open
+     3.2 关闭数据库
+         CDatabase::Close
+     3.3 打开记录集
+         CRecordset::Open     
+                 
+案例的补充细节：
+1 为空的判断，防止空数据被添加到数据库。
+2 成功插入或修改一条记录后，清空控件中原有的数据。
+3 添加登录功能
+              

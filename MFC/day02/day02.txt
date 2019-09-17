@@ -1,0 +1,25 @@
+一 MFC的窗口创建机制
+   回顾Win32的窗口创建过程：
+   设计和注册窗口类->创建窗口->显示更新窗口->消息循环->窗口处理函数
+   PreCreateWindow()     Create()  ShowWindow()   Run() WindowProc()
+1 窗口创建过程-Create函数的执行过程
+  1.1 调用LoadMenu()函数加载菜单
+  1.2 调用CreateEx()函数创建窗口
+      1.2.1 调用PreCreateWindow()函数设计和注册窗口类
+      1.2.2 调用AfxHookWindowCreate()函数设置CBT类型的钩子
+      1.2.3 调用AfxCtxCreateWindowEx()创建窗口，触发钩子处理函数
+            的调用。
+      1.2.4 调用钩子处理函数_AfxCbtFilterHook(),在函数中：
+            1> 连接窗口对象与窗口句柄
+            2> 将窗口处理函数设置为 AfxWndProc()函数
+      1.2.5 跳转回1.2.3 以下步骤继续执行...
+
+2 CFrameWnd类  
+  2.1 虚函数
+      2.1.1 PreCreateWindow()-重写该函数，设置窗口的特征参数
+      2.1.2 WindowProc()-重写该函数，处理各种消息
+  2.2 成员变量
+      m_hWnd-保存窗口句柄      
+  
+  课堂作业: 把win32课程中所做的案例，放到MFC的程序中实现。
+   

@@ -1,0 +1,65 @@
+// 从“截屏”按钮的消息处理函数开始分析
+void CMainFrame::OnToolStart()
+{
+     // 1 创建、连接服务器，发送命令(命令ID为鼠标键盘标识) 
+     PeerCreateSocket();
+     PeerConnectSocket();
+     PeerSendDataS();
+     // 2  创建、连接服务器，发送命令(命令ID为屏幕标识) 
+     PeerCreateSocket();
+     PeerConnectSocket();
+     PeerSendDataS();
+     // 3 启动线程，用于完成屏幕数据的接收
+     AfxBeginThread(OnRrefreshScreen, sctrl);
+}
+// 线程处理函数(循环向视图发送用户自定义消息)
+UINT CMainFrame::OnRrefreshScreen(LPVOID lparam) 
+{
+    CClientView* pWnd = (CClientView*)lparam;
+    while(!g_ExitThread)
+    {
+	pWnd->SendMessage(REFRESHSRC, 0, 0);
+	Sleep(10);
+    }
+    return 0;
+}
+LRESULT CClientView::ReFreshScr(WPARAM wp, LPARAM lp)
+{
+     // 发送数据(是开始接收屏幕数据还是停止接收)   
+     PeerSendDataS();
+     // 先接收屏幕信息，再接收屏幕数据
+     PeerRecvDataS();
+     PeerRecvDataS();
+     // 使得视图窗口无效，引起视图窗口的重新绘制，调用OnPaint或者OnDraw函数。
+     Invalidate();
+}
+void CClientView::OnDraw(CDC* pDC)
+{
+    // 将屏幕显示到视图窗口的客户区   
+    StretchDIBits();
+}
+在视图中处理鼠标键盘消息，将鼠标键盘数据发送给服务器端。
+void CClientView::OnLButtonDown(UINT nFlags, CPoint point)
+{
+	// TODO: 在此添加消息处理程序代码和/或调用默认值
+
+	if(!ifstart)
+		return;
+	keymouse.style=PEER_MOUSE_LEFTDOWN;
+	float fx,fy;
+	CRect rect;
+	GetClientRect(&rect);
+	fx=(float)point.x/rect.Width();
+	fy=(float)point.y/rect.Height();
+	keymouse.x=65535*fx;
+	keymouse.y=65535*fy;	
+	PeerSendDataS(s,(char*)&keymouse,sizeof(keymouse),&retLen,
+					  hEvent);
+}    
+
+
+
+
+
+
+

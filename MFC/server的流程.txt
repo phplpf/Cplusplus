@@ -1,0 +1,76 @@
+// 服务器端的流程从窗口处理函数开始分析
+LRESULT CALLBACK WndProc(HWND hWnd, UINT message,...);
+{
+     case WM_CREATE:
+        // 1 获取主机名称和IP地址
+        gethostname(); 
+        gethostbyname();
+        // 2 启动线程，用于连接客户端,线程函数是AcceptThread 
+        BeginPeerThread( AcceptThread ,...);
+        
+}
+UINT WINAPI AcceptThread(PVOID pParam)
+{
+       PeerCreateSocket();
+       PeerBindSocket();
+       PeerListenSocket();
+       for(;;)
+       {
+            // 接收客户端连接
+            if(	!PeerAcceptSocket( &ClientSocket, &ClientAddr, s ))
+            {
+	continue; 
+            }
+            else
+            {
+                //启动一个新的线程，用于通信 
+                BeginPeerThread(ServerThread,...);
+            } 
+       }   
+}
+UINT WINAPI ServerThread(PVOID pParam)
+{
+     //服务器作为被控端首先接收数据(命令ID) 
+     PeerRecvDataS(...);
+     switch(command.CommandID)
+     {
+          case PEER_KEYMOUSE:
+                //处理鼠标键盘的数据通信
+	PeerScreenMouseKey(s);
+                {
+                     while(1)
+                     {
+                          PeerRecvDataS(s,...);
+                          switch(keymouse.style)
+                          {
+                              case PEER_MOUSE_LEFTDOWN:
+                                  // 鼠标事件
+                                  mouse_event（...）;
+                              ......
+                              case PEER_KEY_DOWN:
+                                  //键盘事件 
+	                  keybd_event(...）;
+                          }  
+                     } 
+                }
+	break;
+          case PEER_SCREEN_GET:
+                //处理屏幕的数据通信
+	PeerScreenGet(s);
+                {
+                    while(1)
+                    {
+                        // 1 首先接收客户端的指令(连接还是退出) 
+                        PeerRecvDataS(...);
+                        // 2 获取服务器端的屏幕数据
+                        GetScreenData(...);
+                        // 3 先发送屏幕信息
+                        PeerSendDataS(...);
+                        // 4 再发送屏幕数据
+                        PeerSendDataS(); 
+                    } 
+                }
+	CleanScreenInfo();
+	break;
+   }
+}

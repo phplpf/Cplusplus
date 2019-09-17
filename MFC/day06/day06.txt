@@ -1,0 +1,138 @@
+一 MFC的切分(拆分)窗口
+   1 分类
+     1.1 静态切分窗口
+         在程序编写时，就已经确定了窗口切分的数量。每个视图窗口
+         可以使用不同的视图类。支持的最大切分数量16*16
+     1.2 动态切分窗口
+         在程序运行时，由用户根据自己的需要实时的切分窗口。通常
+         情况下，每个视图窗口使用的是相同的视图类。支持的最大切分
+         数量是2*2。
+   2 相关类
+     CSplitterWnd类-父类是CWnd类，本质上也是一个窗口。
+     #include <afxext.h>
+   3 相关函数
+     CFrameWnd::OnCreateClient - 主要用来创建框架窗口的客户区对象，
+          被OnCreate函数调用。用户不要调用该函数。
+   4 静态切分
+     4.1 创建静态切分窗口
+         CSplitterWnd::CreateStatic
+         BOOL CreateStatic( 
+          CWnd* pParentWnd,//父窗口 
+          int nRows, 行的数量，最大值为16
+          int nCols, 列的数量，最大值为16
+          DWORD dwStyle = WS_CHILD | WS_VISIBLE, 
+          UINT nID = AFX_IDW_PANE_FIRST
+        ); 
+     4.2 创建视图
+         CSplitterWnd::CreateView
+         virtual BOOL CreateView( 
+           int row, //视图所在行的索引
+           int col, //视图所在列的索引
+           CRuntimeClass* pViewClass,//视图的运行时类信息变量地址 
+           SIZE sizeInit, //视图窗口的初始尺寸
+           CCreateContext* pContext//创建上下文结构体。
+         ); 
+      4.3 获取视图   
+          CSplitterWnd::GetPane
+      4.4 设置活动视图
+          CSplitterWnd::SetActivePane
+     课堂作业： 1 创建一个3*3的静态切分窗口，要求使用统一的视图类，
+                  CMyView类。每个视图窗口大小大致相同。(20分钟)
+   5 动态切分
+     CSplitterWnd::Create
+     BOOL Create( 
+       CWnd* pParentWnd,//父窗口 
+        int nMaxRows,//最大行数， 
+        int nMaxCols,//最大列数 
+        SIZE sizeMin, //最小尺寸
+        CCreateContext* pContext,//创建上下文,通过该函数指定使用的视图类 
+        DWORD dwStyle = WS_CHILD | WS_VISIBLE //窗口风格
+        UINT nID = AFX_IDW_PANE_FIRST
+      );                
+二 文档类
+   1 相关类
+     CDocument类-继承自CCmdTarget类，意味着文档类也可以处理命令消息。
+             文档类的作用是用来管理数据的，包括对数据的保存和加载。
+   2 CDocument类的使用
+     在视图中显示来自于文档的数据
+     CView::OnInitialUpdate()-视图的初始化更新函数，在视图第一次附
+     加文档之后，在视图窗口显示之前该函数被调用。它也是一个虚函数。
+     CView::GetDocument()-获取与视图关联的文档。
+     CFrameWnd::InitialUpdateFrame()-框架的初始化更新函数。该函数
+     放到创建框架窗口之后调用。引起所有与之关联的视图的OnInitialUpdate
+     函数的调用。
+     2.1 框架窗口的WM_CREATE消息对应的处理函数
+         CFrameWnd::OnCreate()
+         {
+            return OnCreateHelper(lpcs, pContext);
+            {
+               OnCreateClient(lpcs, pContext);
+               {
+                  CreateView(pContext, AFX_IDW_PANE_FIRST);
+                  {
+                     // 2.1.1 动态创建视图对象
+                     CWnd* pView = (CWnd*)pContext->m_pNewViewClass->CreateObject();
+                     // 2.1.2 创建视图窗口
+                     pView->Create(...);
+                  }
+               }
+            }
+         }  
+     2.2 视图窗口的WM_CREATE消息对应的处理函数
+         CView::OnCreate()
+         {
+           文档与视图相互保存对方的地址
+           pContext->m_pCurrentDoc->AddView(this);
+           {
+              m_viewList.AddTail(pView);
+              pView->m_pDocument = this;
+           }
+         } 
+         一个文档对应多个视图；一个视图只对应一个文档。
+   3 对命令消息的处理顺序
+     ActiveView->Frame->App  （CFrameWnd::OnCmdMsg）
+     Document       (CView::OnCmdMsg)
+     ActiveView->Document->Frame->App              
+    
+     用户自定义一个类 CMyClass类，处理命令消息。
+     1>直接或者间接从CCmdTarget类派生。
+     2>在该类中添加消息映射
+     3>在文档类中，增加成员变量 CMyClass对象。重写文档类的OnCmdMsg
+       函数，在函数中调用CMyClass的OnCmdMsg函数。
+   4 App、Frame、View和Doc之间的关系
+     
+     CWinApp
+       |->m_pMainWnd (CFrameWnd)
+             |->m_pViewActive (CView)
+                    |->m_pDocument (CDocument)
+                           |->m_viewList (CView List)
+                             
+三 使用文档模板创建文档视图架构程序
+   1 相关类
+   CDocTemplate类-文档模板类的抽象基类，提供了文档模板的基本功能。
+   CSingleDocTemplate类-继承自CDocTemplate类，用来创建单文档视图程序。
+   CMultiDocTemplate类-继承自CDocTemplate类，用来创建多文档视图程序。
+   2 使用CSingleDocTemplate类创建单文档视图程序
+     CSingleDocTemplate( 
+      UINT nIDResource, //资源ID
+      CRuntimeClass* pDocClass, //文档类的运行时类信息
+      CRuntimeClass* pFrameClass, //框架类的运行时类信息
+      CRuntimeClass* pViewClass//视图类的运行时类信息
+     );
+     从构造函数的参数可知，在定义文档类、框架类、视图类时，都需要
+     支持动态创建
+   3 在App::InitInstance函数中：
+     3.1 创建( new )单文档模板对象
+     3.2 将文档模板保存到应用程序
+         CWinApp::AddDocTemplate(&文档模板)   
+     3.3 新建文档
+         CWinApp::OnFileNew()
+               
+     注意：设置项目时，先选择动态链接MFC库。
+     
+        
+      
+             
+                      
+                                          
+                             

@@ -1,0 +1,51 @@
+AfxWndProc(HWND hWnd, UINT nMsg, ...);
+{
+  return AfxCallWndProc(pWnd, hWnd, nMsg, wParam, lParam);
+  {
+     lResult = pWnd->WindowProc(nMsg, wParam, lParam);
+     {
+        // 如果在OnWndMsg函数中，没有成功处理消息
+        if (!OnWndMsg(message, wParam, lParam, &lResult))
+           // 调用DefWindowProc()函数做默认处理
+		     lResult = DefWindowProc(message, wParam, lParam);
+     }
+  }
+}
+OnWndMsg(message, wParam, lParam, &lResult)
+{
+   // 1 定义了一个联合体变量mmf
+   union MessageMapFunctions mmf;
+   // mmf的成员pfn赋值为0
+	mmf.pfn = 0;
+	// 2 调用CMyFrameWnd::GetMessageMap(),获取当前类的&messageMap
+	pMessageMap = GetMessageMap();
+   for (; pMessageMap->pfnGetBaseMap != NULL;
+			pMessageMap = (*pMessageMap->pfnGetBaseMap)())
+	{
+	   // 根据message的值(消息ID)在当前结构体数组中找与之配备的结构体
+	   // 如果找到了，返回结构体的地址lpEntry。 
+	   if ((lpEntry = AfxFindMessageEntry(pMessageMap->lpEntries,
+					message, 0, 0)) != NULL)
+		{
+			goto LDispatch;
+		}
+	}
+LDispatch:
+   // mmf.pfn =>CMyFrameWnd::OnCreate	
+	mmf.pfn = lpEntry->pfn;	
+	switch (lpEntry->nSig)
+	{
+	  ...
+	  case AfxSig_l_w_l:
+	   // pfn保存了CMyFrameWnd::OnCreate函数的地址
+	   // pfn_l_w_l的值是CMyFrameWnd::OnCreate函数的地址
+		lResult = (this->*mmf.pfn_l_w_l)(wParam, lParam);
+		{
+		   //用户消息处理函数的代码。
+		}
+		break;
+ 	  ...
+	}	
+	
+	
+}

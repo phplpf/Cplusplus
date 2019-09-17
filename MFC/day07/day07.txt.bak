@@ -1,0 +1,59 @@
+一 使用单文档模板类创建单文档视图程序
+   框架类、视图类、文档类都需要支持动态创建
+   1 创建过程
+     1.1 创建单文档模板对象
+         CSingleDocTemplate()
+     1.2 将文档模板对象添加到应用程序
+         CWinApp::AddDocTemplate 
+     1.3 新建文档 
+         CWinApp::OnFileNew
+   2 类与类(对象与对象)之间的关系
+   CWinApp
+     |->m_pDocManager (CDocManager)
+          |->m_templateList (CSingleDocTemplate) 
+                |->m_pOnlyDoc (CDocument)
+     |->m_pMainWnd (CFrameWnd)
+          |->m_pViewActive (CView)
+                |->m_pDocument (CDocument)
+                      |->m_viewList (CView List)
+                      |->m_pDocTemplate (CSingleDocTemplate) 
+                      
+二 使用多文档模板创建多文档视图架构程序
+   1 相关类
+     1.1 CMultiDocTemplate 类-文档模板类
+     1.2 CMDIFrameWnd类-多文档的主框架窗口类
+     1.3 CMDIChildWnd类-多文档的子框架窗口类
+     1.4 CWinApp类-应用程序类
+     1.5 CView/CEditView类-视图类
+     1.6 CDocument类-文档类
+     
+     多文档的主框架和子框架分别拥有自己的菜单和图标资源。
+     
+     CMultiDocTemplate( 
+      UINT nIDResource,// 多文档子框架的资源ID
+      CRuntimeClass* pDocClass, 
+      CRuntimeClass* pFrameClass,//多文档的子框架类的运行时类信息 
+      CRuntimeClass* pViewClass
+    );                                  
+   2 创建过程
+     2.1 创建多文档的主框架窗口(与一般的框架窗口创建过程类似)
+     2.2 子框架、文档和视图是通过文档模板动态创建的，与使用
+         单文档创建单文档视图程序的过程类似。
+   3 多个视图数据同步的例子
+     3.1 "新建"菜单-文档、子框架和视图都被创建。OnFileNew()
+     
+     3.2 "新建窗口"菜单-基于原有活动文档创建新的子框架和视图。
+         一个文档对应多个视图。(10分钟)
+         在多文档的子框架窗口类中实现"新建窗口"菜单的消息处理
+         3.2.1 获取活动文档(拿到文档了)
+               CFrameWnd::GetActiveDocument
+         3.2.2 根据文档获取与之相关的文档模板
+               CDocument::GetDocTemplate      
+         3.2.3 使用文档模板创建新的子框架
+               CDocTemplate::CreateNewFrame 
+         3.2.4 初始化更新框架
+               CFrameWnd::InitialUpdateFrame
+     3.3 捕获活动视图内容发生变换的消息
+                                
+                 
+                 

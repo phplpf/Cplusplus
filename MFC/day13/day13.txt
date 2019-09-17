@@ -1,0 +1,51 @@
+MFC的第三部分 Windows平台的网络通信编程
+1 简单介绍
+  1.1 基本的socket函数
+  1.2 以WSA开头的socket函数
+  1.3 MFC的socket类
+2 基本的socket函数
+  2.1 相关文件(以2.2版本的socket库为例)
+      dll文件:ws2_32.dll
+      lib文件：ws2_32.lib
+      h文件：winsock2.h
+  2.2 使用步骤
+      2.2.1 初始化socket库
+            int WSAStartup(
+              WORD wVersionRequested,//请求使用的库的版本 
+              LPWSADATA lpWSAData//返回可用的版本
+            );
+      2.2.2 使用
+            TCP 通信或UDP通信
+      2.2.3 卸载socket库     
+            int WSACleanup();
+  2.3 TCP通信
+      2.3.1 服务器端
+            1> 创建
+            2> 绑定
+            3> 监听
+            4> 接收客户端连接 (阻塞) 
+            5> 通信
+            6> 关闭
+      2.3.2 客户端
+            1> 创建
+            2> 连接
+            3> 通信
+            4> 关闭
+  2.4 UDP通信
+      2.4.1 服务器端
+            1> 创建      SOCK_DGRAM
+            2> 绑定
+            3> 通信      recvfrom/sendto  
+            4> 关闭
+      2.4.3 客户端
+            1> 创建
+            2> 通信      sendto/recvfrom
+            3> 关闭                
+3 使用MFC的socket类完成一个简单的文件传输
+  3.1 相关类
+      CAsyncSocket类-异步socket类。
+      CSocket类-继承自 CAsyncSocket类，同步socket类。
+      #include <afxsock.h>
+                       
+                           
+      

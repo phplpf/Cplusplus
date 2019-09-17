@@ -1,0 +1,74 @@
+一 MFC的对话框
+   1 相关类
+     1.1 CDialog类-父类是CWnd类，称为对话框类。
+     1.2 CCommonDialog类-父类是CDialog类，称为通用对话框。主要包括
+         以下6个子类：
+         1.2.1 CFileDialog类-文件对话框。
+         1.2.2 CColorDialog类-颜色对话框。
+         1.2.3 CFontDialog类-字体对话框。
+         1.2.4 CFindReplaceDialog类-查找/替换对话框。
+         1.2.5 CPageSetupDialog类-页面设置对话框。
+         1.2.6 CPrintDialog类-打印对话框
+   2 分类
+     2.1 模式对话框-阻塞的
+     2.2 非模式对话框
+   3 使用CDialog类实现基于模式对话框的应用程序
+     3.1 创建CDialog类的子类，并与对话框资源关联。
+     3.2 创建和显示对话框
+         CDialog::DoModal
+     3.3 对话框的关闭
+         CDialog::OnOK和OnCancel
+   4 使用CDialog类实现基于非模式对话框的应用程序           
+     4.1 创建CDialog类的子类，并与对话框资源关联。
+     4.2 创建和显示对话框
+         创建过程与一般的框架窗口是类似。
+     4.3 对话框的关闭
+         4.3.1 重写CDialog::OnOK和OnCancel，在函数中：
+               DestroyWindow();
+         4.3.2 重新CWnd::PostNcDestroy函数，在函数中：
+               delete this;
+               
+   5 基于MFC向导的单文档程序分别创建模式和非模式对话框
+二 对话框的控件操作
+   1 使用GetDlgItem函数
+      
+   2 使用对话框数据交互技术
+   2.1 概念
+       将控件与对话框的成员变量绑定，通过操作成员变量的方式达到
+       操作控件的目的。
+   2.2 实现步骤
+       2.2.1 添加成员变量
+             成员变量的类型分两大类:控件类型和值类型。需要通过调用
+             对象的相关函数操作控件时，通常绑定控件类型的变量。需要
+             获取或者设置控件的值时，通常绑定值类型的变量。
+             CButton m_wndOK;//控件类型的变量
+             CString m_strEdit;//值类型的变量
+       2.2.2 重写CWnd::DoDataExchange 函数，在函数中完成绑定操作
+             DDX_Control();//控件类型的绑定函数
+             DDX_Text();//值类型的绑定函数
+             
+       2.2.3 如果是控件类型的绑定，直接操作。
+             如果是值类型的绑定，还需要调用UpdateData()函数
+             UpdateData(TRUE)-将用户在控件中输入的值传递给变量。控件=>变量
+             UpdateData(FALSE)-将变量的值放到控件中显式。变量=>控件
+                           
+三 用户登录的例子
+   CDlgLogin  
+四 加法运算的例子
+                 
+五 MFC的各种控件
+   1 静态控件
+     静态文本、分组框和图片
+   2 按钮控件-对应的控件类都是CButton类
+     下压式按钮、复选按钮和单选按钮
+     下压式按钮主要是处理它的单击事件。
+      2.1 CButton::SetCheck/SetCheck
+   3 组合框和列表框控件
+     3.1 组合框控件-控件类是CComboBox类。可以编辑也可以选择。
+     
+     3.2 列表框控件-控件类是CListBox类。只能选择不能编辑。但是
+                    既支持单选也支持多选。
+                    
+                        
+                      
+                   

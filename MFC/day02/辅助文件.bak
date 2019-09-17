@@ -1,0 +1,109 @@
+// 窗口创建过程
+pFrame->Create(NULL,"MFCBase");
+{
+   //  加载菜单
+   ::LoadMenu();
+   //  创建窗口，lpszClassName的值为NULL
+   CreateEx(dwExStyle, lpszClassName,...);
+   {
+      CREATESTRUCT cs;
+	   cs.lpszClass = lpszClassName;//NULL
+	   cs.lpszName = lpszWindowName;//"MFCBase"
+	   // 1 设计和注册窗口类
+	   PreCreateWindow(cs);-----------------虚函数
+	   {
+	      if (cs.lpszClass == NULL)
+	      {
+		     // MFC有很多不同类型的内置窗口，通过宏定义进行标识
+		     // AFX_WNDFRAMEORVIEW_REG的值为8，8号类型的窗口
+		     AfxDeferRegisterClass(AFX_WNDFRAMEORVIEW_REG);
+		     {
+		        WNDCLASS wndcls;
+		        // 窗口处理函数
+		        wndcls.lpfnWndProc = DefWindowProc;
+	           wndcls.hInstance = AfxGetInstanceHandle();
+	           wndcls.hCursor = afxData.hcurArrow;
+	           if (fToRegister & AFX_WNDFRAMEORVIEW_REG)
+	           {
+		            // SDI Frame or MDI Child windows or views - normal colors
+		            wndcls.style = CS_DBLCLKS | CS_HREDRAW | CS_VREDRAW;
+		            wndcls.hbrBackground = (HBRUSH) (COLOR_WINDOW + 1);
+		               第二个参数的值是：  "AfxFrameOrView100sd"，系统设定的
+		               // 8号类型窗口类的类名
+		            if (_AfxRegisterWithIcon(&wndcls, _afxWndFrameOrView, AFX_IDI_STD_FRAME))
+			         {
+			            //窗口类的类名
+			            pWndCls->lpszClassName = lpszClassName;
+			            // 加载默认的图标
+			            pWndCls->hIcon = ::LoadIcon(NULL, IDI_APPLICATION);
+			            return AfxRegisterClass(pWndCls);
+			            {
+			               ::AfxCtxRegisterClass(lpWndClass);
+			            }
+			         }     
+			              fRegisteredClasses |= AFX_WNDFRAMEORVIEW_REG;
+	           }
+		     }
+		     // 保存窗口类的类名
+		     cs.lpszClass = _afxWndFrameOrView; 
+		     
+		     
+	      }
+	   }
+	   // 2 设置钩子，this->new CMyFramWnd与pFrame有相同的值
+	   AfxHookWindowCreate(this);
+	   {
+	      // 2.1 设置CBT类型的钩子，钩子函数是_AfxCbtFilterHook
+	      // 第三个参数是NULL，所以是局部钩子(进程内钩子)
+	      ::SetWindowsHookEx(WH_CBT,
+			_AfxCbtFilterHook, NULL, ::GetCurrentThreadId());
+			// 2.2 将this的值保存到线程状态信息中
+			pThreadState->m_pWndInit = pWnd;
+			
+	   }
+	   // 3 创建窗口
+	   HWND hWnd = ::AfxCtxCreateWindowEx(...);
+	   // 4 满足钩子条件，跳转到钩子处理函数中
+	   _AfxCbtFilterHook(int code, WPARAM wParam, ...);
+	   {
+	      // 4.1 从线程状态信息中取出窗口对象地址赋值给pWndInit
+	      // pFrame <==> pWndInit
+	      CWnd* pWndInit = pThreadState->m_pWndInit;
+	      // 4.2 hWnd就是在第三步创建的窗口的句柄
+	      HWND hWnd = (HWND)wParam;
+	      // 4.3 连接窗口句柄与窗口对象地址
+	      pWndInit->Attach(hWnd);
+	      {
+	         CHandleMap* pMap = afxMapHWND(TRUE);
+	         pMap->SetPermanent(m_hWnd = hWndNew, this); 
+	         {
+	            //以窗口句柄为键，窗口对象地址为值建立映射
+	            m_permanentMap[(LPVOID)h] = permOb; 
+	         }
+	      }
+	      // 4.4 首先获取MFC框架提供的窗口处理函数
+	      WNDPROC afxWndProc = AfxGetAfxWndProc();
+	      // 4.5 将窗口处理函数替换为afxWndProc
+	      oldWndProc = (WNDPROC)SetWindowLongPtr(hWnd, GWLP_WNDPROC,
+				(DWORD_PTR)afxWndProc);
+			return TRUE;
+	      
+	   }
+	   // 5 钩子函数执行完成后，跳转回第3步之后的继续执行
+	   ...
+	   return TRUE;
+   }
+}
+
+// 窗口处理函数的调用
+LRESULT CALLBACK
+AfxWndProc(HWND hWnd, UINT nMsg,...);
+{
+   // 根据窗口句柄，获取窗口对象地址(pFrame)
+   CWnd* pWnd = CWnd::FromHandlePermanent(hWnd);
+   // 将窗口对象地址以及句柄一并作为参数写入下面的函数中
+   return AfxCallWndProc(pWnd, hWnd, nMsg, wParam, lParam);
+   {
+      
+   }
+} 

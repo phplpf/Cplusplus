@@ -1,0 +1,91 @@
+一 消息映射
+   1 概念
+     消息映射指的是消息ID与消息处理函数的对应关系。
+   2 实现步骤
+     2.1 在类的定义中添加消息映射的声明宏
+         DECLARE_MESSAGE_MAP()
+     2.2 在类的实现中添加消息映射的实现宏
+         BEGIN_MESSAGE_MAP(theClass,baseClass)
+         END_MESSAGE_MAP( )
+     2.3 在实现宏中添加具体的消息映射宏
+         ON_MESSAGE(消息ID1，消息处理函数1)
+         ON_MESSAGE(消息ID2，消息处理函数2)
+         ......
+     2.4 在类中添加消息处理函数的声明和实现
+  3 实现原理
+    3.1 宏替换
+        ...
+    3.2 成员的作用
+        3.2.1 GetThisMessageMap()-静态的成员函数。
+        3.2.2 GetMessageMap()-虚函数。
+    3.3 成员之间的关系
+        GetMessageMap()调用了GetThisMessageMap()函数，两个函数的
+        功能是一样的。
+    3.4 GetThisMessageMap()函数的具体实现
+        3.4.1 函数的成员的分析
+        _messageEntries[]-静态的常量数组。数组类型是 AFX_MSGMAP_ENTRY 。
+        数组就保存了当前类对消息处理的信息(ID与函数的对应关系)。
+        struct AFX_MSGMAP_ENTRY
+        {
+	       UINT nMessage;   // 窗口消息的ID
+	       UINT nCode;      // 通知消息的通知码
+	       UINT nID;        // 菜单或控件ID(与命令消息相关的ID)
+	       UINT nLastID;    // 在一个范围中结束ID（多个菜单或控件对应同一个函数）
+	       
+	       UINT_PTR nSig;   // 消息处理函数的类型(根据函数的参数以及返回值划分)
+	       AFX_PMSG pfn;    // 消息处理函数的函数指针
+        };
+        messageMap-静态的结构体常量。类型是AFX_MSGMAP。
+        
+        
+        struct AFX_MSGMAP
+        { 
+	       // 是一个函数指针，返回值类型是 AFX_MSGMAP*
+	       const AFX_MSGMAP* (PASCAL* pfnGetBaseMap)();
+	       // 是一个数组的指针，保存_messageEntries[]的地址
+	       const AFX_MSGMAP_ENTRY* lpEntries;
+        }; 
+        return &messageMap; //函数返回messageMap的地址。
+    3.5 函数以及结构体变量之前的关系
+    GetMessageMap()
+       |->GetThisMessageMap()
+             |->&messageMap
+                  |-> _messageEntries[],保存了CMyFrameWnd类对消息的处理信息。
+                      WM_CREATE <==> OnCreate
+                      WM_PAINT  <==> OnPaint
+                  |-> &CFrameWnd::GetThisMessageMap
+                         |->CFrameWnd::&messageMap 
+                              |->_messageEntries[],保存了CFrameWnd类对消息的处理信息。
+                                WM_CREATE <==> OnCreate     
+                                WM_DESTROY <==>OnDestroy
+                                WM_CLOSE  <==>OnClose
+                                .......
+                         |->&CWnd::GetThisMessageMap
+                                |->CWnd::&messageMap
+                                      |->_messageEntries[],保存了CWnd类对消息的处理信息。
+                                        WM_SIZE <==>OnSize
+                                        ......
+                                      |->&CCmdTargt::GetThisMessageMap 
+                                              |->CCmdTargt::&messageMap
+                                                    |->_messageEntries[],有效元素为0.
+                                                    |->NULL
+            形成一个继承层次关系上的消息处理信息的链表(消息链)
+            
+     3.6 消息映射的执行流程
+     参考辅助文件
+二 MFC对消息的分类
+   1 窗口消息(标准消息)
+     与窗口创建过程相关以及鼠标、键盘和定时器等消息
+     ON_WM_XXX
+     例如：
+     ON_WM_CREATE、ON_WM_PAINT、ON_WM_MOUSEMOVE等。
+   2 命令消息
+     菜单、工具栏以及加速键等消息
+     ON_COMMAND( 菜单ID,消息处理函数)
+   3 通知消息
+     大部分的控件消息属于通知消息
+     ON_EN_CHANGE(控件ID,消息处理函数)
+   4 用户自定义消息
+     ON_MESSAGE(消息ID,消息处理函数)	         
+             
+            

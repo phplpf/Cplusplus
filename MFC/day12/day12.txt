@@ -1,0 +1,59 @@
+使用Ado访问和操作数据库
+1 Ado的介绍
+  Ado是一个基于COM技术的单独的组件。可以为VB、MFC、asp等程序提供
+  数据库访问服务。
+2 Ado组件文件
+  文件名称:msado15.dll
+  文件路径：C:\Program Files\Common Files\System\ado\msado15.dll
+3 在MFC程序中导入Ado组件，并初始化COM库
+  3.1 在stdafx.h中，增加如下导入命令：
+      #import "文件路径" no_namespace rename("EOF","adoEOF")  
+  3.2 在App::InitInstance()函数中：
+      CoInitialize(NULL);
+      在App::ExitInstance()函数中：
+      void CoUninitialize(); 
+  编译程序，在项目的debug目录下，生成msado15.tlh和msado15.tli两个
+  文件，msado15.tlh相当于组件类的头文件；msado15.tli相当于组件类
+  的实现文件。
+4 Ado组件的接口类
+  4.1 _ConnectionPtr类-功能类似于ODBC的CDatabase类。
+  4.2 _RecordsetPtr类-功能类似于ODBC的CRecordset类。
+  MFC的字符串类是CString，COM中的字符串类是_bstr_t。
+  MFC中还有其它多种不同类型，COM中可变类型 _variant_t。
+  
+  
+5  _ConnectionPtr类的使用
+   5.1 打开数据库
+       Open 
+   5.2 关闭数据库 
+       Close
+6  _RecordsetPtr类的使用
+   6.1 打开记录集
+       _RecordsetPtr::Open
+        HRESULT Open (
+        const _variant_t & Source,//表名、Sql语句、存储过程名称
+        const _variant_t & ActiveConnection,//活动连接
+        enum CursorTypeEnum CursorType,//记录集的游标类型
+        enum LockTypeEnum LockType,//记录集的锁类型
+        long Options//选项，adCmdTable、adCmdText、adCmdStoredProc
+       ); 
+       
+       //游标类型
+       CursorTypeEnum
+       {
+         adOpenForwardOnly = 0,//单向的静态游标
+         adOpenKeyset = 1,//键集游标(动态游标的一种)
+         adOpenDynamic = 2,//动态游标
+         adOpenStatic = 3 // 双向的静态游标 
+       };      
+                   
+       LockTypeEnum
+     {
+   
+        adLockReadOnly = 1,//只读记录集
+        adLockPessimistic = 2,//悲观的锁定方式
+        adLockOptimistic = 3,//乐观的锁定方式
+        adLockBatchOptimistic = 4//批处理乐观的锁定方式
+    };            
+                 
+                        

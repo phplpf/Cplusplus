@@ -1,0 +1,52 @@
+// 入口函数
+int WinMain(HINSTANCE hInstance, ...)
+{
+   return AfxWinMain(hInstance, ...);
+   {
+      // 1 pThread和pApp保存的都是全局变量&theApp(类型 CMyWinApp )
+      // CMyWinApp:CWinApp:CWinThread
+      CWinThread* pThread = AfxGetThread();
+	   CWinApp* pApp = AfxGetApp();
+	   
+	   // 2 应用程序框架的内部初始化和应用程序的全局初始化
+	   AfxWinInit();
+	   pApp->InitApplication();
+	   
+	   // 3 由虚函数机制所知，调用CMyWinApp::InitInstance函数
+	   pThread->InitInstance();-----------------------虚函数1
+	   {
+	     //用户代码，创建了基本的窗口
+	   }
+	   // 4 消息循环
+	   nReturnCode = pThread->Run();------------------虚函数2
+	   {
+	      return CWinThread::Run();
+	      {
+	         for (;;)
+	         {
+	            // 当消息队列中，没有消息时
+	            while(!::PeekMessage(...))
+	            {
+	               // 做空闲处理
+	               OnIdle(...);-----------------------虚函数3
+	            } 
+	            // 当有消息时，做消息循环
+	            do
+	            {
+	                // 消息循环，如果是WM_QUIT,程序退出
+			          if (!PumpMessage())
+			          {
+			            ::GetMessage();
+			            ::TranslateMessage();
+			            ::DispatchMessage();
+			          }
+				          //退出前，一定会调用ExitInstance();
+				          return ExitInstance();----------虚函数4
+	            
+	            }while (::PeekMessage(...));
+	         }
+	      }
+	   }
+	   return nReturnCode;
+   }
+}
